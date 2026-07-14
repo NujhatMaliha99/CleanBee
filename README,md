@@ -1,0 +1,26 @@
+# Smart Waste Management System
+
+A web-based volunteer-driven waste management system for reporting waste, assigning volunteer cleanup tasks, tracking request status, and encouraging responsible waste disposal.
+
+## Tech Stack
+
+- Frontend: React.js
+- Backend: Laravel (PHP)
+- Database: MySQL
+- Rendering Method: Client-Side Rendering (CSR)
+- Version Control: GitHub
+
+## Main Features
+
+- Landing page
+- User registration and login
+- Role-based dashboard
+- Waste report / pickup request
+- Volunteer task assignment
+- Waste verification
+- Eco-point reward system
+- Admin reporting dashboard
+
+## Project Status
+
+Initial project setup in progress.
