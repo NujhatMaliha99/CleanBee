@@ -1,0 +1,335 @@
+.cb-login {
+  --forest-soft: #1f6b45;
+  --leaf-glow: #6fcf97;
+  --leaf-glow-2: #a8e6bd;
+  --honey-light: #ffe08a;
+  --honey-deep: #ffc94a;
+  --ink: #123a26;
+  --ink-soft: #4c6b5b;
+  --glass: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --field-bg: rgba(255, 255, 255, 0.55);
+
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: "Poppins", "Segoe UI", system-ui, sans-serif;
+  background: radial-gradient(120% 90% at 50% 0%, #f2fbf4 0%, #e2f5e6 45%, #cdeed6 100%);
+}
+
+/* ---------- ambient 3D blobs (same as login) ---------- */
+.cb-login-blob {
+  position: absolute;
+  border-radius: 42% 58% 63% 37% / 41% 45% 55% 59%;
+  filter: blur(2px);
+  opacity: 0.55;
+  pointer-events: none;
+  animation: cbBlobFloat 9s ease-in-out infinite;
+}
+.cb-login-blob.b1 {
+  width: 340px;
+  height: 340px;
+  top: -120px;
+  left: -110px;
+  background: linear-gradient(145deg, var(--leaf-glow), var(--leaf-glow-2));
+  box-shadow: 0 40px 80px -20px rgba(31, 107, 69, 0.35);
+}
+.cb-login-blob.b2 {
+  width: 300px;
+  height: 300px;
+  bottom: -140px;
+  right: -100px;
+  background: linear-gradient(145deg, var(--honey-light), var(--honey-deep));
+  box-shadow: 0 40px 80px -20px rgba(255, 201, 74, 0.4);
+  animation-delay: 1.4s;
+}
+.cb-login-blob.b3 {
+  width: 160px;
+  height: 160px;
+  top: 12%;
+  right: 8%;
+  background: linear-gradient(145deg, var(--leaf-glow-2), #eafaf0);
+  opacity: 0.4;
+  animation-delay: 2.6s;
+}
+
+@keyframes cbBlobFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+  50%      { transform: translateY(-18px) rotate(6deg) scale(1.04); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-login-blob { animation: none; }
+}
+
+/* ---------- glass card ---------- */
+/* Register form is longer than Login, so the card gets a bit more width
+   and its own max-height + inner scroll so it never overflows the viewport. */
+.cb-login-card.cb-register-card {
+  max-width: 440px;
+  max-height: 92dvh;
+  overflow-y: auto;
+  padding: 36px 32px 28px;
+}
+.cb-login-card.cb-register-card::-webkit-scrollbar {
+  width: 6px;
+}
+.cb-login-card.cb-register-card::-webkit-scrollbar-thumb {
+  background: rgba(31, 107, 69, 0.25);
+  border-radius: 10px;
+}
+
+.cb-login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 400px;
+  padding: 40px 32px 32px;
+  border-radius: 28px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 2px 4px rgba(18, 58, 38, 0.06),
+    0 24px 48px -12px rgba(18, 58, 38, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  animation: cbCardRise 0.7s cubic-bezier(.2,.8,.2,1) both;
+}
+
+@keyframes cbCardRise {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.cb-login-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.cb-login-eyebrow {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.3px;
+}
+
+.cb-login-title {
+  margin: 4px 0 0;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+}
+.cb-login-title .accent {
+  background: linear-gradient(120deg, var(--forest-soft), var(--leaf-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cb-login-sub {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* ---------- fields ---------- */
+.cb-field {
+  margin-bottom: 18px;
+}
+
+/* First/Last name sit side by side on wider screens */
+.cb-field-row {
+  display: flex;
+  gap: 14px;
+}
+.cb-field-row .cb-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.cb-field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cb-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 14px;
+  background: var(--field-bg);
+  border: 1px solid rgba(31, 107, 69, 0.14);
+  box-shadow: inset 0 2px 4px rgba(18, 58, 38, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.cb-input-wrap:focus-within {
+  border-color: var(--leaf-glow);
+  box-shadow: 0 0 0 4px rgba(111, 207, 151, 0.22);
+}
+
+.cb-input-wrap input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 13px 14px 13px 4px;
+  font-size: 15px;
+  color: var(--ink);
+  font-family: inherit;
+}
+.cb-input-wrap input::placeholder {
+  color: #8fa89b;
+}
+
+/* date input's calendar icon should match the palette */
+.cb-input-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(28%) sepia(45%) saturate(600%) hue-rotate(100deg);
+  cursor: pointer;
+}
+
+.cb-input-icon {
+  width: 18px;
+  height: 18px;
+  margin-left: 14px;
+  color: var(--forest-soft);
+  flex-shrink: 0;
+}
+
+.cb-toggle-visibility {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+}
+.cb-toggle-visibility svg { width: 18px; height: 18px; }
+
+/* ---------- terms checkbox row ---------- */
+.cb-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4px 0 24px;
+  font-size: 13px;
+}
+
+.cb-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.cb-terms input {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--forest-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.cb-terms a {
+  color: var(--forest-soft);
+  font-weight: 600;
+  text-decoration: none;
+}
+.cb-terms a:hover { text-decoration: underline; }
+
+.cb-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+}
+.cb-remember input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--forest-soft);
+  cursor: pointer;
+}
+
+.cb-forgot {
+  color: var(--forest-soft);
+  font-weight: 600;
+  text-decoration: none;
+}
+.cb-forgot:hover { text-decoration: underline; }
+
+/* ---------- submit button, 3D press ---------- */
+.cb-submit {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--leaf-glow-2), var(--leaf-glow));
+  box-shadow:
+    0 10px 20px -6px rgba(31, 107, 69, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.cb-submit:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 14px 24px -6px rgba(31, 107, 69, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+.cb-submit:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px -4px rgba(31, 107, 69, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.cb-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cb-login-footer {
+  margin-top: 22px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+.cb-login-footer a {
+  color: var(--forest-soft);
+  font-weight: 600;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+}
+.cb-login-footer a:hover { text-decoration: underline; }
+
+@media (max-width: 380px) {
+  .cb-login-card { padding: 32px 22px 26px; border-radius: 22px; }
+  .cb-login-title { font-size: 26px; }
+  .cb-field-row { flex-direction: column; gap: 0; }
+}
