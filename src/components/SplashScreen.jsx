@@ -154,6 +154,11 @@ export default function SplashScreen({ onFinish, duration = 4200 }) {
 
         <footer className="cb-footer">
           <p className="cb-footer-text">Building a cleaner future...</p>
+          <button className="cb-skip" onClick={handleSkip} aria-label="Skip splash screen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </footer>
       </div>
     </div>
