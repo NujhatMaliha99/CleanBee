@@ -3,14 +3,16 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import SplashScreen from "./components/SplashScreen";
 import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
+import LandingScreen from "./components/LandingScreen";
 import Dashboard from "./components/Dashboard";
 
 function App() {
-  // sessionStorage চেক করে দেখবে এই সেশনে আগে স্প্ল্যাশ স্ক্রিন দেখানো হয়েছে কিনা
-  const [showSplash, setShowSplash] = useState(() => {
-    return !sessionStorage.getItem("splashShown");
-  });
+
+  const [showSplash, setShowSplash] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // প্রথমবার splash-এর পরে login-এ নিয়ে যাবে, কিন্তু একবার login করলে
+  // landing-এ logout করলেও আর login-এ redirect হবে না (guest mode)
+  const [needsInitialLogin, setNeedsInitialLogin] = useState(true);
 
   const handleLogin = (data) => {
     if (data && data.email) {
@@ -22,6 +24,7 @@ function App() {
       }
     }
     setIsLoggedIn(true);
+    setNeedsInitialLogin(false);
   };
 
   const handleRegister = (data) => {
@@ -31,6 +34,7 @@ function App() {
       if (data.email) localStorage.setItem("email", data.email);
     }
     setIsLoggedIn(true);
+    setNeedsInitialLogin(false);
   };
 
   const handleLogout = () => {
@@ -41,7 +45,6 @@ function App() {
     return (
       <SplashScreen
         onFinish={() => {
-          sessionStorage.setItem("splashShown", "true"); // একবার দেখানো হলে মার্ক করে রাখবে
           setShowSplash(false);
         }}
       />
@@ -84,9 +87,21 @@ function App() {
         }
       />
 
-      {/* Home Route */}
+      {/* Home Route — প্রথমবার login লাগবে, তারপর guest mode-ও কাজ করবে */}
       <Route
         path="/"
+        element={
+          !isLoggedIn && needsInitialLogin ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <LandingScreen isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          )
+        }
+      />
+
+      {/* Dashboard Route — reached from the "Go to dashboard" button on the landing page */}
+      <Route
+        path="/dashboard"
         element={
           isLoggedIn ? (
             <Dashboard onLogout={handleLogout} />
@@ -97,13 +112,10 @@ function App() {
       />
 
       {/* Backward Compatibility for /parent */}
-      <Route
-        path="/parent"
-        element={<Navigate to="/" replace />}
-      />
+      <Route path="/parent" element={<Navigate to="/" replace />} />
 
-      {/* Fallback Route - কোনো পাথ না মিললে লগইনে পাঠাবে */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Fallback Route - matched na hole landing-e pathabe */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

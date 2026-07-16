@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./LoginScreen.css";
 
 const MailIcon = () => (
@@ -124,7 +125,7 @@ export default function LoginScreen({ onLogin }) {
         </button>
 
         <p className="cb-login-footer">
-          Don&apos;t have an account? <a href="/signup">Sign up</a>
+          Don&apos;t have an account? <Link to="/register">Sign up</Link>
         </p>
       </form>
     </div>
