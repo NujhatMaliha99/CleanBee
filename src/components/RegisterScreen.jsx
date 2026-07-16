@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./LoginScreen.css";
 import "./RegisterScreen.css";
 
@@ -223,7 +224,7 @@ export default function RegisterScreen({ onRegister }) {
         </button>
 
         <p className="cb-login-footer">
-          Already have an account? <a href="/login">Login</a>
+          Already have an account? <Link to="/login">Login</Link>
         </p>
       </form>
     </div>
