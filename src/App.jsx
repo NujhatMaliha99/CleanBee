@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import SplashScreen from "./components/SplashScreen";
 import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
@@ -10,8 +10,7 @@ function App() {
 
   const [showSplash, setShowSplash] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // প্রথমবার splash-এর পরে login-এ নিয়ে যাবে, কিন্তু একবার login করলে
-  // landing-এ logout করলেও আর login-এ redirect হবে না (guest mode)
+  
   const [needsInitialLogin, setNeedsInitialLogin] = useState(true);
 
   const handleLogin = (data) => {
@@ -41,6 +40,14 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  const navigate = useNavigate();
+
+  const handleGuestLogin = () => {
+    // Guest mode — login ছাড়াই landing page-এ নিয়ে যাবে
+    setNeedsInitialLogin(false);
+    navigate("/", { replace: true });
+  };
+
   if (showSplash) {
     return (
       <SplashScreen
@@ -60,7 +67,7 @@ function App() {
           isLoggedIn ? (
             <Navigate to="/" replace />
           ) : (
-            <LoginScreen onLogin={handleLogin} />
+            <LoginScreen onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
           )
         }
       />
@@ -87,7 +94,7 @@ function App() {
         }
       />
 
-      {/* Home Route — প্রথমবার login লাগবে, তারপর guest mode-ও কাজ করবে */}
+      {/* Home Route  */}
       <Route
         path="/"
         element={
