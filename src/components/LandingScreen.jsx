@@ -21,6 +21,8 @@ const ICONS = {
     "M4 9h16M7 3v4M17 3v4M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm2 9h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01",
   camera:
     "M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Zm8 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z",
+  menu: "M4 7h16M4 12h16M4 17h16",
+  close: "M6 6l12 12M18 6 6 18",
 };
 
 function Icon({ name, size = 22 }) {
@@ -97,6 +99,7 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
     typeof window !== "undefined" ? localStorage.getItem("firstName") : null;
   const [scrolled, setScrolled] = useState(false);
   const [tickerIndex, setTickerIndex] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
@@ -105,6 +108,16 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // lock body scroll while the mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = menuOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
+  const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
     const id = setInterval(
@@ -125,7 +138,7 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
   return (
     <div className="landing">
       {/* Nav */}
-      <header className={`cb-nav${scrolled ? " is-scrolled" : ""}`}>
+      <header className={`cb-nav${scrolled ? " is-scrolled" : ""}${menuOpen ? " is-open" : ""}`}>
         <div className="cb-nav-inner">
           <span className="cb-logo">
             Clean<span className="accent">Bee</span>
@@ -156,8 +169,59 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
               </>
             )}
           </div>
+          <button
+            type="button"
+            className="cb-nav-toggle"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={menuOpen}
+            aria-controls="cb-mobile-menu"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <Icon name={menuOpen ? "close" : "menu"} size={24} />
+          </button>
+        </div>
+
+        {/* Mobile menu drawer */}
+        <div
+          id="cb-mobile-menu"
+          className={`cb-mobile-menu${menuOpen ? " is-open" : ""}`}
+        >
+          <nav className="cb-mobile-links">
+            <a href="#how-it-works" onClick={closeMenu}>How it works</a>
+            <a href="#features" onClick={closeMenu}>Features</a>
+            <a href="#rewards" onClick={closeMenu}>Rewards</a>
+          </nav>
+          <div className="cb-mobile-cta">
+            {isLoggedIn ? (
+              <>
+                <Link to="/dashboard" className="cb-btn cb-btn-primary" onClick={closeMenu}>
+                  Go to dashboard
+                </Link>
+                <button
+                  type="button"
+                  className="cb-btn cb-btn-ghost"
+                  onClick={() => {
+                    closeMenu();
+                    onLogout();
+                  }}
+                >
+                  Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/register" className="cb-btn cb-btn-primary" onClick={closeMenu}>
+                  Get started
+                </Link>
+                <Link to="/login" className="cb-btn cb-btn-ghost" onClick={closeMenu}>
+                  Sign in
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
+      {menuOpen && <div className="cb-mobile-scrim" onClick={closeMenu} aria-hidden="true" />}
 
       {/* Hero */}
       <section className="cb-hero">
