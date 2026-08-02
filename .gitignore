@@ -11,6 +11,17 @@ node_modules
 dist
 dist-ssr
 *.local
+vendor
+.env
+database/*.sqlite
+.phpunit.cache
+.phpunit.result.cache
+bootstrap/cache/*.php
+storage/*.key
+storage/pail
+.composer-cache
+.composer-tools
+.laravel-scaffold
 
 # Editor directories and files
 .vscode/*

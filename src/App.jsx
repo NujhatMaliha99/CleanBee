@@ -1,43 +1,65 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import SplashScreen from "./components/SplashScreen";
 import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
 import LandingScreen from "./components/LandingScreen";
 import Dashboard from "./components/Dashboard";
+import { authApi } from "./services/api";
 
 function App() {
 
   const [showSplash, setShowSplash] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  
-  const [needsInitialLogin, setNeedsInitialLogin] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem("authToken")));
+  const [needsInitialLogin, setNeedsInitialLogin] = useState(() => !localStorage.getItem("authToken"));
 
-  const handleLogin = (data) => {
-    if (data && data.email) {
-      localStorage.setItem("email", data.email);
-      if (!localStorage.getItem("firstName")) {
-        const namePart = data.email.split("@")[0];
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-        localStorage.setItem("firstName", formattedName);
-      }
-    }
+  const saveSession = useCallback(({ token, user }) => {
+    localStorage.setItem("authToken", token);
+    localStorage.setItem("firstName", user.first_name || "");
+    localStorage.setItem("lastName", user.last_name || "");
+    localStorage.setItem("email", user.email || "");
     setIsLoggedIn(true);
     setNeedsInitialLogin(false);
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    authApi.currentUser()
+      .then(({ user }) => saveSession({ token, user }))
+      .catch(() => {
+        localStorage.removeItem("authToken");
+        setIsLoggedIn(false);
+        setNeedsInitialLogin(true);
+      });
+  }, [saveSession]);
+
+  const handleLogin = async ({ email, password }) => {
+    const session = await authApi.login({ email: email.trim().toLowerCase(), password });
+    saveSession(session);
   };
 
-  const handleRegister = (data) => {
-    if (data) {
-      if (data.firstName) localStorage.setItem("firstName", data.firstName);
-      if (data.lastName) localStorage.setItem("lastName", data.lastName);
-      if (data.email) localStorage.setItem("email", data.email);
+  const handleRegister = async (data) => {
+    const session = await authApi.register({
+      first_name: data.firstName,
+      last_name: data.lastName,
+      email: data.email.trim().toLowerCase(),
+      password: data.password,
+    });
+    saveSession(session);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Logout locally when the server cannot revoke an expired token.
+    } finally {
+      localStorage.removeItem("authToken");
+      setIsLoggedIn(false);
+      setNeedsInitialLogin(true);
     }
-    setIsLoggedIn(true);
-    setNeedsInitialLogin(false);
-  };
-
-  const handleLogout = () => {
-    setIsLoggedIn(false);
   };
 
   const navigate = useNavigate();
@@ -67,7 +89,10 @@ function App() {
           isLoggedIn ? (
             <Navigate to="/" replace />
           ) : (
-            <LoginScreen onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
+            <LoginScreen
+              onLogin={handleLogin}
+              onGuestLogin={handleGuestLogin}
+            />
           )
         }
       />

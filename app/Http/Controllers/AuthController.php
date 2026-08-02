@@ -12,10 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
-    /**
-     * Register a new user.
-     * Issue #17: Implement registration
-     */
     public function register(RegisterRequest $request): JsonResponse
     {
         $validated = $request->validated();
@@ -37,15 +33,11 @@ class AuthController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-    /**
-     * Authenticate a user and issue token.
-     * Issue #18: Implement login
-     */
     public function login(LoginRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::whereRaw('LOWER(email) = ?', [$validated['email']])->first();
 
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             return response()->json([
@@ -62,22 +54,15 @@ class AuthController extends Controller
         ], Response::HTTP_OK);
     }
 
-    /**
-     * Logout authenticated user and revoke token.
-     * Issue #19: Implement logout
-     */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
             'message' => 'Successfully logged out'
         ], Response::HTTP_OK);
     }
 
-    /**
-     * Get authenticated user profile.
-     */
     public function me(Request $request): JsonResponse
     {
         return response()->json([

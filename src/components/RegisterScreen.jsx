@@ -70,11 +70,25 @@ export default function RegisterScreen({ onRegister }) {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onRegister &&
-      onRegister({ firstName, lastName, dob, email, password, confirmPassword, acceptTerms });
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setError("");
+    setIsSubmitting(true);
+    try {
+      await onRegister?.({ firstName, lastName, dob, email, password, confirmPassword, acceptTerms });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -219,8 +233,10 @@ export default function RegisterScreen({ onRegister }) {
           </label>
         </div>
 
-        <button type="submit" className="cb-submit" disabled={!acceptTerms}>
-          Register
+        {error && <p className="cb-form-error" role="alert">{error}</p>}
+
+        <button type="submit" className="cb-submit" disabled={!acceptTerms || isSubmitting}>
+          {isSubmitting ? "Creating account..." : "Register"}
         </button>
 
         <p className="cb-login-footer">
