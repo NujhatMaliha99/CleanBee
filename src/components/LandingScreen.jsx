@@ -94,7 +94,7 @@ const STATS = [
   { value: "3,200", label: "volunteers onboard" },
 ];
 
-export default function LandingScreen({ isLoggedIn, onLogout }) {
+export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
   const firstName =
     typeof window !== "undefined" ? localStorage.getItem("firstName") : null;
   const [scrolled, setScrolled] = useState(false);
@@ -158,10 +158,14 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
                   Go to dashboard
                 </Link>
               </>
+            ) : hasRegistered ? (
+              <Link to="/login" className="cb-btn cb-btn-primary">
+                Login
+              </Link>
             ) : (
               <>
                 <Link to="/login" className="cb-btn cb-btn-ghost">
-                  Sign in
+                  Login
                 </Link>
                 <Link to="/register" className="cb-btn cb-btn-primary">
                   Get started
@@ -208,13 +212,17 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
                   Log out
                 </button>
               </>
+            ) : hasRegistered ? (
+              <Link to="/login" className="cb-btn cb-btn-primary" onClick={closeMenu}>
+                Login
+              </Link>
             ) : (
               <>
                 <Link to="/register" className="cb-btn cb-btn-primary" onClick={closeMenu}>
                   Get started
                 </Link>
                 <Link to="/login" className="cb-btn cb-btn-ghost" onClick={closeMenu}>
-                  Sign in
+                  Login
                 </Link>
               </>
             )}
@@ -249,6 +257,10 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
                     See your eco rewards
                   </a>
                 </>
+              ) : hasRegistered ? (
+                <Link to="/login" className="cb-btn cb-btn-primary cb-btn-lg">
+                  Login
+                </Link>
               ) : (
                 <>
                   <Link to="/register" className="cb-btn cb-btn-primary cb-btn-lg">
@@ -431,6 +443,14 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
               Go to your dashboard
             </Link>
           </>
+        ) : hasRegistered ? (
+          <>
+            <h2>Ready for your next pickup?</h2>
+            <p>Log in to schedule a pickup or check your rewards.</p>
+            <Link to="/login" className="cb-btn cb-btn-dark cb-btn-lg">
+              Login
+            </Link>
+          </>
         ) : (
           <>
             <h2>Ready to make pickup day pay off?</h2>
@@ -466,9 +486,11 @@ export default function LandingScreen({ isLoggedIn, onLogout }) {
                   Log out
                 </button>
               </>
+            ) : hasRegistered ? (
+              <Link to="/login">Login</Link>
             ) : (
               <>
-                <Link to="/login">Sign in</Link>
+                <Link to="/login">Login</Link>
                 <Link to="/register">Create account</Link>
               </>
             )}

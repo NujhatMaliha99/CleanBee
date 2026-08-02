@@ -12,14 +12,19 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem("authToken")));
   const [needsInitialLogin, setNeedsInitialLogin] = useState(() => !localStorage.getItem("authToken"));
+  const [hasRegistered, setHasRegistered] = useState(
+    () => localStorage.getItem("hasRegistered") === "true" || Boolean(localStorage.getItem("email"))
+  );
 
   const saveSession = useCallback(({ token, user }) => {
     localStorage.setItem("authToken", token);
     localStorage.setItem("firstName", user.first_name || "");
     localStorage.setItem("lastName", user.last_name || "");
     localStorage.setItem("email", user.email || "");
+    localStorage.setItem("hasRegistered", "true");
     setIsLoggedIn(true);
     setNeedsInitialLogin(false);
+    setHasRegistered(true);
   }, []);
 
   useEffect(() => {
@@ -126,7 +131,11 @@ function App() {
           !isLoggedIn && needsInitialLogin ? (
             <Navigate to="/login" replace />
           ) : (
-            <LandingScreen isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+            <LandingScreen
+              hasRegistered={hasRegistered}
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+            />
           )
         }
       />
