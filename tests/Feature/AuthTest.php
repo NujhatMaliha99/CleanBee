@@ -11,9 +11,6 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    /**
-     * Test successful user registration.
-     */
     public function test_user_can_register_successfully(): void
     {
         $response = $this->postJson('/api/register', [
@@ -23,7 +20,7 @@ class AuthTest extends TestCase
             'password'   => 'password123',
         ]);
 
-        $response->assertStatus(21)
+        $response->assertStatus(201)
                  ->assertJsonStructure(['message', 'user', 'token']);
 
         $this->assertDatabaseHas('users', [
@@ -31,9 +28,6 @@ class AuthTest extends TestCase
         ]);
     }
 
-    /**
-     * Test registration validation errors.
-     */
     public function test_registration_validation_fails_for_invalid_email(): void
     {
         $response = $this->postJson('/api/register', [
@@ -46,9 +40,6 @@ class AuthTest extends TestCase
                  ->assertJsonValidationErrors(['email', 'password']);
     }
 
-    /**
-     * Test user login with valid credentials.
-     */
     public function test_user_can_login_with_valid_credentials(): void
     {
         $user = User::create([
@@ -66,9 +57,23 @@ class AuthTest extends TestCase
                  ->assertJsonStructure(['message', 'user', 'token']);
     }
 
-    /**
-     * Test login failure with invalid password.
-     */
+    public function test_login_normalizes_email_address(): void
+    {
+        User::create([
+            'first_name' => 'Nujhat',
+            'email'      => 'nujhat@example.com',
+            'password'   => Hash::make('password123'),
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email'    => '  NUJHAT@EXAMPLE.COM  ',
+            'password' => 'password123',
+        ]);
+
+        $response->assertStatus(200)
+                 ->assertJsonPath('user.email', 'nujhat@example.com');
+    }
+
     public function test_login_fails_with_invalid_credentials(): void
     {
         User::create([
@@ -86,18 +91,12 @@ class AuthTest extends TestCase
                  ->assertJson(['message' => 'Invalid email or password']);
     }
 
-    /**
-     * Test protected route access requires authentication.
-     */
     public function test_protected_user_route_requires_authentication(): void
     {
         $response = $this->getJson('/api/user');
         $response->assertStatus(401);
     }
 
-    /**
-     * Test role based middleware blocks unauthorized users.
-     */
     public function test_role_middleware_blocks_regular_users_from_admin_route(): void
     {
         $user = User::create([
@@ -111,9 +110,6 @@ class AuthTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /**
-     * Test user logout revokes access token.
-     */
     public function test_user_can_logout_successfully(): void
     {
         $user = User::create([
@@ -121,10 +117,13 @@ class AuthTest extends TestCase
             'email'      => 'nujhat@example.com',
             'password'   => Hash::make('password123'),
         ]);
+        $token = $user->createToken('auth_token')->plainTextToken;
 
-        $response = $this->actingAs($user, 'sanctum')->postJson('/api/logout');
+        $response = $this->withToken($token)->postJson('/api/logout');
 
         $response->assertStatus(200)
                  ->assertJson(['message' => 'Successfully logged out']);
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
     }
 }

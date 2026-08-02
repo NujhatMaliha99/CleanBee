@@ -45,10 +45,20 @@ export default function LoginScreen({ onLogin, onGuestLogin }) {
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin && onLogin({ email, password, remember });
+    setError("");
+    setIsSubmitting(true);
+    try {
+      await onLogin?.({ email, password, remember });
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleGuestLogin = () => {
@@ -124,8 +134,10 @@ export default function LoginScreen({ onLogin, onGuestLogin }) {
           </a>
         </div>
 
-        <button type="submit" className="cb-submit">
-          Sign In
+        {error && <p className="cb-form-error" role="alert">{error}</p>}
+
+        <button type="submit" className="cb-submit" disabled={isSubmitting}>
+          {isSubmitting ? "Logging in..." : "Login"}
         </button>
 
         <div className="cb-divider">

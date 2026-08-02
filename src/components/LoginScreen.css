@@ -306,3 +306,10 @@
   .cb-login-card { padding: 32px 22px 26px; border-radius: 22px; }
   .cb-login-title { font-size: 26px; }
 }
+
+.cb-form-error {
+  margin: 0 0 14px;
+  color: #b42318;
+  font-size: 0.9rem;
+  text-align: center;
+}
