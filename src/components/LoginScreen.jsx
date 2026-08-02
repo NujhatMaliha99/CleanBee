@@ -137,7 +137,7 @@ export default function LoginScreen({ onLogin, onGuestLogin }) {
         {error && <p className="cb-form-error" role="alert">{error}</p>}
 
         <button type="submit" className="cb-submit" disabled={isSubmitting}>
-          {isSubmitting ? "Signing in..." : "Sign In"}
+          {isSubmitting ? "Logging in..." : "Login"}
         </button>
 
         <div className="cb-divider">
