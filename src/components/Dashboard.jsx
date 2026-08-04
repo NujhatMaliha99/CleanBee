@@ -10,10 +10,17 @@ const LeafIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 const UserIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 const MailIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>;
 const CalendarIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>;
+const EditIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>;
+const PhoneIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>;
+const PinIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>;
 
 export default function Dashboard({ onLogout }) {
   const [firstName, setFirstName] = useState(() => localStorage.getItem("firstName") || "");
   const [email, setEmail] = useState(() => localStorage.getItem("email") || "user@cleanbee.com");
+  const [phone, setPhone] = useState(() => localStorage.getItem("phone") || "");
+  const [address, setAddress] = useState(() => localStorage.getItem("address") || "");
+  const [bio, setBio] = useState(() => localStorage.getItem("bio") || "Eco-conscious CleanBee member.");
+
   const [showModal, setShowModal] = useState(null); // "pickup", "guide", "profile", "bell"
   const [stats, setStats] = useState({ total: 12, completed: 8, pending: 4, points: 150 });
   const [activities, setActivities] = useState([
@@ -24,7 +31,13 @@ export default function Dashboard({ onLogout }) {
 
   const [inputName, setInputName] = useState(firstName);
   const [inputEmail, setInputEmail] = useState(email);
+  const [inputPhone, setInputPhone] = useState(phone);
+  const [inputAddress, setInputAddress] = useState(address);
+  const [inputBio, setInputBio] = useState(bio);
   const [wasteType, setWasteType] = useState("Plastic");
+
+  const [errors, setErrors] = useState({});
+  const [toast, setToast] = useState("");
 
   const handleRequestPickup = (e) => {
     e.preventDefault();
@@ -34,12 +47,43 @@ export default function Dashboard({ onLogout }) {
     setShowModal(null);
   };
 
+  const validateProfile = () => {
+    const errs = {};
+    if (!inputName.trim()) errs.name = "Name is required.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inputEmail)) errs.email = "Enter a valid email address.";
+    if (inputPhone && !/^\+?[0-9\s-]{7,15}$/.test(inputPhone)) errs.phone = "Enter a valid phone number.";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSaveProfile = (e) => {
     e.preventDefault();
+    if (!validateProfile()) return;
+
     localStorage.setItem("firstName", inputName);
     localStorage.setItem("email", inputEmail);
+    localStorage.setItem("phone", inputPhone);
+    localStorage.setItem("address", inputAddress);
+    localStorage.setItem("bio", inputBio);
+
     setFirstName(inputName);
     setEmail(inputEmail);
+    setPhone(inputPhone);
+    setAddress(inputAddress);
+    setBio(inputBio);
+
+    setShowModal(null);
+    setToast("Profile updated successfully!");
+    setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleCancelProfile = () => {
+    setInputName(firstName);
+    setInputEmail(email);
+    setInputPhone(phone);
+    setInputAddress(address);
+    setInputBio(bio);
+    setErrors({});
     setShowModal(null);
   };
 
@@ -49,7 +93,6 @@ export default function Dashboard({ onLogout }) {
         <h1 className="db-logo">Clean<span className="accent">Bee</span></h1>
         <nav className="db-nav">
           <button className="nav-btn active">Dashboard</button>
-          <button className="nav-btn" onClick={() => setShowModal("profile")}>Profile</button>
           <button className="nav-btn" onClick={() => setShowModal("guide")}>Guide</button>
           <button className="nav-btn logout" onClick={onLogout}>Logout</button>
         </nav>
@@ -107,12 +150,21 @@ export default function Dashboard({ onLogout }) {
           </div>
 
           <div className="db-right">
+            {/* ---------- Profile Section (Display Mode) ---------- */}
             <section className="db-card profile-summary">
               <div className="avatar">{firstName ? firstName.charAt(0).toUpperCase() : "U"}</div>
               <h4>{firstName || "CleanBee User"}</h4>
+              {bio && <p className="profile-bio">{bio}</p>}
+
               <div className="info-row"><UserIcon /><span>{firstName || "User"}</span></div>
               <div className="info-row"><MailIcon /><span>{email}</span></div>
+              {phone && <div className="info-row"><PhoneIcon /><span>{phone}</span></div>}
+              {address && <div className="info-row"><PinIcon /><span>{address}</span></div>}
               <div className="info-row"><CalendarIcon /><span>Member Since July 2026</span></div>
+
+              <button className="edit-profile-btn" onClick={() => setShowModal("profile")}>
+                <EditIcon /> Edit Profile
+              </button>
             </section>
 
             <section className="db-card alerts-panel">
@@ -152,21 +204,39 @@ export default function Dashboard({ onLogout }) {
         </div>
       )}
 
+      {/* ---------- Profile Section (Edit Mode / Modal) ---------- */}
       {showModal === "profile" && (
-        <div className="modal-overlay" onClick={() => setShowModal(null)}>
-          <form className="modal-card" onClick={e => e.stopPropagation()} onSubmit={handleSaveProfile}>
+        <div className="modal-overlay" onClick={handleCancelProfile}>
+          <form className="modal-card" onClick={e => e.stopPropagation()} onSubmit={handleSaveProfile} noValidate>
             <h3>Edit Profile</h3>
+
             <div className="form-item">
-              <label htmlFor="first-name-input">First Name</label>
+              <label htmlFor="first-name-input">Full Name</label>
               <input id="first-name-input" type="text" value={inputName} onChange={e => setInputName(e.target.value)} required />
+              {errors.name && <span className="field-error">{errors.name}</span>}
             </div>
             <div className="form-item">
               <label htmlFor="email-input">Email Address</label>
               <input id="email-input" type="email" value={inputEmail} onChange={e => setInputEmail(e.target.value)} required />
+              {errors.email && <span className="field-error">{errors.email}</span>}
             </div>
+            <div className="form-item">
+              <label htmlFor="phone-input">Phone Number</label>
+              <input id="phone-input" type="tel" value={inputPhone} onChange={e => setInputPhone(e.target.value)} placeholder="+880 1XXXXXXXXX" />
+              {errors.phone && <span className="field-error">{errors.phone}</span>}
+            </div>
+            <div className="form-item">
+              <label htmlFor="address-input">Address / Location</label>
+              <input id="address-input" type="text" value={inputAddress} onChange={e => setInputAddress(e.target.value)} />
+            </div>
+            <div className="form-item">
+              <label htmlFor="bio-input">Bio</label>
+              <textarea id="bio-input" rows={3} value={inputBio} onChange={e => setInputBio(e.target.value)} maxLength={140} />
+            </div>
+
             <div className="modal-btns">
-              <button type="button" onClick={() => setShowModal(null)}>Cancel</button>
-              <button type="submit" className="primary">Save</button>
+              <button type="button" onClick={handleCancelProfile}>Cancel</button>
+              <button type="submit" className="primary">Save Changes</button>
             </div>
           </form>
         </div>
@@ -195,6 +265,9 @@ export default function Dashboard({ onLogout }) {
           <div className="bell-item">Earned 20 Eco Points</div>
         </div>
       )}
+
+      {/* Success Toast */}
+      {toast && <div className="toast-success">{toast}</div>}
     </div>
   );
 }
