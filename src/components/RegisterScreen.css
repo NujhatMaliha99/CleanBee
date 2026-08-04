@@ -69,20 +69,10 @@
 }
 
 /* ---------- glass card ---------- */
-/* Register form is longer than Login, so the card gets a bit more width
-   and its own max-height + inner scroll so it never overflows the viewport. */
+/* Modified: removed inner scroll so it scrolls smoothly with the whole page like Login */
 .cb-login-card.cb-register-card {
   max-width: 440px;
-  max-height: 92dvh;
-  overflow-y: auto;
   padding: 36px 32px 28px;
-}
-.cb-login-card.cb-register-card::-webkit-scrollbar {
-  width: 6px;
-}
-.cb-login-card.cb-register-card::-webkit-scrollbar-thumb {
-  background: rgba(31, 107, 69, 0.25);
-  border-radius: 10px;
 }
 
 .cb-login-card {
