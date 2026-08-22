@@ -5,6 +5,9 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AuthTest extends TestCase
@@ -13,6 +16,8 @@ class AuthTest extends TestCase
 
     public function test_user_can_register_successfully(): void
     {
+        Notification::fake();
+
         $response = $this->postJson('/api/register', [
             'first_name' => 'Nujhat',
             'last_name'  => 'Maliha',
@@ -26,6 +31,62 @@ class AuthTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email' => 'nujhat@example.com',
         ]);
+
+        Notification::assertSentTo(User::where('email', 'nujhat@example.com')->first(), VerifyEmail::class);
+    }
+
+    public function test_user_can_verify_email_from_signed_link(): void
+    {
+        $user = User::create([
+            'first_name' => 'Nujhat',
+            'email' => 'nujhat@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $verificationUrl = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addMinutes(60),
+            ['user' => $user->id, 'hash' => sha1($user->email)]
+        );
+
+        $this->get($verificationUrl)
+            ->assertRedirect('http://localhost:5173/verify-email?verified=1');
+
+        $this->assertTrue($user->fresh()->hasVerifiedEmail());
+    }
+
+    public function test_user_can_resend_verification_email(): void
+    {
+        Notification::fake();
+
+        $user = User::create([
+            'first_name' => 'Nujhat',
+            'email' => 'nujhat@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/email/verification-notification')
+            ->assertOk()
+            ->assertJson(['message' => 'Verification email sent']);
+
+        Notification::assertSentTo($user, VerifyEmail::class);
+    }
+
+    public function test_unverified_user_cannot_update_profile(): void
+    {
+        $user = User::create([
+            'first_name' => 'Nujhat',
+            'email' => 'nujhat@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->putJson('/api/profile', [
+                'first_name' => 'Updated',
+                'email' => $user->email,
+            ])
+            ->assertForbidden();
     }
 
     public function test_registration_validation_fails_for_invalid_email(): void

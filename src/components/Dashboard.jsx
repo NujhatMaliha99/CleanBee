@@ -77,7 +77,7 @@ const PinIcon = () => (
   </svg>
 );
 
-export default function Dashboard({ onLogout }) {
+export default function Dashboard({ onLogout, onUserUpdated }) {
   // User information coming from Laravel
   const [user, setUser] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -237,6 +237,7 @@ setBio(
     });
 
     const updatedUser = response.user;
+    onUserUpdated?.(updatedUser);
 
     setUser(updatedUser);
 

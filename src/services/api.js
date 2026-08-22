@@ -43,6 +43,11 @@ export const authApi = {
 
   currentUser: () => request("/me"),
 
+  resendVerification: () =>
+    request("/email/verification-notification", {
+      method: "POST",
+    }),
+
   updateProfile: (details) =>
     request("/profile", {
       method: "PUT",
