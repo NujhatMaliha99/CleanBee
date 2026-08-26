@@ -87,8 +87,10 @@ class AuthController extends Controller
         ], Response::HTTP_OK);
     }
 
-    public function verifyEmail(Request $request, User $user)
+    public function verifyEmail(Request $request, string $id)
     {
+        $user = User::findOrFail($id);
+
         abort_unless(
             hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification())),
             Response::HTTP_FORBIDDEN
