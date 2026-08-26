@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\PickupRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -19,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('verified')->group(function () {
         Route::put('/profile', [AuthController::class, 'updateProfile']);
+        Route::apiResource('pickups', PickupRequestController::class);
 
         Route::middleware(RoleMiddleware::class . ':volunteer,admin')->group(function () {
         Route::get('/volunteer/tasks', function () {
