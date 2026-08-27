@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\PickupRequestController;
+use App\Http\Controllers\PickupPhotoController;
 use App\Http\Controllers\VolunteerTaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('verified')->group(function () {
         Route::put('/profile', [AuthController::class, 'updateProfile']);
         Route::apiResource('pickups', PickupRequestController::class);
+        Route::get('/pickups/{pickup}/photos', [PickupPhotoController::class, 'index']);
+        Route::post('/pickups/{pickup}/photos', [PickupPhotoController::class, 'store']);
 
         Route::middleware(RoleMiddleware::class . ':volunteer,admin')->group(function () {
             Route::get('/volunteer/tasks', [VolunteerTaskController::class, 'index']);
@@ -33,6 +36,8 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::middleware(RoleMiddleware::class . ':admin')->group(function () {
+            Route::patch('/pickup-photos/{photo}/approve', [PickupPhotoController::class, 'approve']);
+            Route::patch('/pickup-photos/{photo}/reject', [PickupPhotoController::class, 'reject']);
             Route::get('/admin/reports', function () {
                 return response()->json(['message' => 'Admin system reports']);
             });
