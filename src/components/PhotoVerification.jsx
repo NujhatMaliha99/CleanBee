@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { pickupApi } from "../services/api";
 import "./PhotoVerification.css";
 
 /* ── Inline SVG icons  ── */
@@ -41,7 +42,6 @@ function formatTime(t) {
 
 /* ── Component ── */
 export default function PhotoVerification({ isLoggedIn, onLogout }) {
-  const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
   /* Form state */
@@ -50,11 +50,16 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
   const [address, setAddress]     = useState("");
   const [date, setDate]           = useState("");
   const [time, setTime]           = useState("");
+  const [quantity, setQuantity]   = useState("1");
+  const [unit, setUnit]           = useState("kg");
+  const [contactPhone, setContactPhone] = useState("");
 
   /* UI state */
   const [errors, setErrors]       = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [summary, setSummary]     = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
   /* ── Handlers ── */
   function handleFileChange(e) {
@@ -79,25 +84,55 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
     if (!address.trim()) errs.address  = "Please enter a pickup address.";
     if (!date)           errs.date     = "Please select a preferred date.";
     if (!time)           errs.time     = "Please select a preferred time.";
+    if (!quantity || Number(quantity) <= 0) errs.quantity = "Please enter a valid quantity.";
+    if (!contactPhone.trim()) errs.contactPhone = "Please enter a contact phone number.";
     return errs;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setServerError("");
+
+    if (!isLoggedIn) {
+      setServerError("Please log in with a verified account before submitting a pickup request.");
+      return;
+    }
+
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
-    
-    setSummary({
-      photoName: photo.name,
-      category,
-      address: address.trim(),
-      date: formatDate(date),
-      time: formatTime(time),
-    });
-    setSubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const pickupResponse = await pickupApi.create({
+        waste_type: category === "Other" ? "mixed" : category.toLowerCase(),
+        quantity: Number(quantity),
+        quantity_unit: unit,
+        pickup_address: address.trim(),
+        pickup_date: date,
+        pickup_time: time,
+        contact_phone: contactPhone.trim(),
+      });
+
+      await pickupApi.uploadPhoto(pickupResponse.data.id, photo.file, "before");
+
+      setSummary({
+        pickupId: pickupResponse.data.id,
+        photoName: photo.name,
+        category,
+        quantity: `${quantity} ${unit}`,
+        address: address.trim(),
+        date: formatDate(date),
+        time: formatTime(time),
+      });
+      setSubmitted(true);
+    } catch (requestError) {
+      setServerError(requestError.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   /* ── Success State ── */
@@ -117,13 +152,21 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
             </div>
             <h2>Pickup request submitted!</h2>
             <p className="pv-success-sub">
-              Your request has been recorded. A volunteer will be matched shortly.
+              Your request and verification photo have been saved. A volunteer will be matched shortly.
             </p>
 
             <div className="pv-summary">
               <div className="pv-summary-row">
+                <span className="pv-summary-label">Pickup ID</span>
+                <span className="pv-summary-value">#{summary.pickupId}</span>
+              </div>
+              <div className="pv-summary-row">
                 <span className="pv-summary-label">Photo</span>
                 <span className="pv-summary-value">{summary.photoName}</span>
+              </div>
+              <div className="pv-summary-row">
+                <span className="pv-summary-label">Quantity</span>
+                <span className="pv-summary-value">{summary.quantity}</span>
               </div>
               <div className="pv-summary-row">
                 <span className="pv-summary-label">Waste Type</span>
@@ -142,10 +185,6 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
                 <span className="pv-summary-value">{summary.time}</span>
               </div>
             </div>
-
-            <p className="pv-demo-note">
-              This is a frontend demonstration. No data has been saved to a database.
-            </p>
 
             <div className="pv-success-actions">
               {isLoggedIn ? (
@@ -168,7 +207,11 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
                   setAddress("");
                   setDate("");
                   setTime("");
+                  setQuantity("1");
+                  setUnit("kg");
+                  setContactPhone("");
                   setErrors({});
+                  setServerError("");
                 }}
               >
                 Submit Another
@@ -313,6 +356,48 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
           <section className="pv-section pv-card">
             <h2 className="pv-section-title">Pickup Information</h2>
 
+            <div className="pv-row-two">
+              <div className="form-item">
+                <label htmlFor="pv-quantity">Quantity</label>
+                <input
+                  id="pv-quantity"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={quantity}
+                  onChange={(e) => {
+                    setQuantity(e.target.value);
+                    setErrors((prev) => ({ ...prev, quantity: "" }));
+                  }}
+                />
+                {errors.quantity && <span className="field-error" role="alert">{errors.quantity}</span>}
+              </div>
+
+              <div className="form-item">
+                <label htmlFor="pv-unit">Unit</label>
+                <select id="pv-unit" value={unit} onChange={(e) => setUnit(e.target.value)}>
+                  <option value="kg">Kilograms</option>
+                  <option value="bags">Bags</option>
+                  <option value="items">Items</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-item">
+              <label htmlFor="pv-contact-phone">Contact Phone</label>
+              <input
+                id="pv-contact-phone"
+                type="tel"
+                placeholder="e.g. +8801712345678"
+                value={contactPhone}
+                onChange={(e) => {
+                  setContactPhone(e.target.value);
+                  setErrors((prev) => ({ ...prev, contactPhone: "" }));
+                }}
+              />
+              {errors.contactPhone && <span className="field-error" role="alert">{errors.contactPhone}</span>}
+            </div>
+
             <div className="form-item">
               <label htmlFor="pv-address">Pickup Address</label>
               <input
@@ -367,8 +452,10 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
           </section>
 
           {/* ── 4. Submit ── */}
-          <button type="submit" className="pv-btn pv-btn-primary pv-btn-submit">
-            Submit Pickup Request
+          {serverError && <p className="pv-field-error" role="alert">{serverError}</p>}
+
+          <button type="submit" className="pv-btn pv-btn-primary pv-btn-submit" disabled={isSubmitting}>
+            {isSubmitting ? "Submitting..." : "Submit Pickup Request"}
           </button>
 
         </form>
