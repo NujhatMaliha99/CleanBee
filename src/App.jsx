@@ -6,6 +6,9 @@ import RegisterScreen from "./components/RegisterScreen";
 import LandingScreen from "./components/LandingScreen";
 import Dashboard from "./components/Dashboard";
 import VerifyEmailScreen from "./components/VerifyEmailScreen";
+import PhotoVerification from "./components/PhotoVerification";
+import AreaReports from "./components/AreaReports";
+import Notifications from "./components/Notifications";
 import { authApi } from "./services/api";
 
 function App() {
@@ -192,6 +195,39 @@ function App() {
 
       {/* Backward Compatibility for /parent */}
       <Route path="/parent" element={<Navigate to="/" replace />} />
+
+      {/* Photo Verification — accessible to guests and logged-in users */}
+      <Route
+        path="/photo-verification"
+        element={
+          <PhotoVerification
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      {/* Area Reports — accessible to guests and logged-in users */}
+      <Route
+        path="/area-reports"
+        element={
+          <AreaReports
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      {/* Notifications / Instant Alerts — accessible to guests and logged-in users */}
+      <Route
+        path="/notifications"
+        element={
+          <Notifications
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
+        }
+      />
 
       {/* Fallback Route - matched na hole landing-e pathabe */}
       <Route path="*" element={<Navigate to="/" replace />} />
