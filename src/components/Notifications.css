@@ -1,0 +1,380 @@
+/* ── Page shell ── */
+.notif-page {
+  --forest-soft: #1f6b45;
+  --leaf-glow: #6fcf97;
+  --leaf-glow-2: #a8e6bd;
+  --honey-deep: #ffc94a;
+  --ink: #123a26;
+  --ink-soft: #4c6b5b;
+  --glass: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --line: rgba(31, 107, 69, 0.12);
+
+  font-family: "Poppins", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, #f2fbf4 0%, #e2f5e6 45%, #cdeed6 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ── */
+.notif-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px min(5%, 40px);
+  background: rgba(242, 251, 244, 0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(31, 107, 69, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.notif-logo {
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.notif-accent {
+  background: linear-gradient(120deg, var(--forest-soft), var(--leaf-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.notif-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Main ── */
+.notif-main {
+  flex: 1;
+  padding: 32px min(5%, 40px) 56px;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── Page heading ── */
+.notif-page-head {
+  margin-bottom: 28px;
+}
+
+.notif-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+
+.notif-back-link:hover {
+  color: var(--forest-soft);
+}
+
+.notif-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest-soft);
+  background: rgba(111, 207, 151, 0.18);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.notif-page-head h1 {
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.notif-subtitle {
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── Unread summary bar ── */
+.notif-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.notif-unread-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ── Filter tabs ── */
+.notif-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.notif-filter-tab {
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1.5px solid rgba(31, 107, 69, 0.18);
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.notif-filter-tab:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--leaf-glow);
+  color: var(--ink);
+}
+
+.notif-filter-tab--active {
+  background: linear-gradient(135deg, var(--leaf-glow-2), var(--leaf-glow));
+  border-color: transparent;
+  color: var(--ink);
+  box-shadow: 0 4px 12px rgba(31, 107, 69, 0.2);
+}
+
+/* ── Notification list ── */
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Notification card ── */
+.notif-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(18, 58, 38, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.notif-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(18, 58, 38, 0.1);
+}
+
+/* Unread card has a subtle green-tinted background */
+.notif-card:not(.notif-card--read) {
+  background: rgba(232, 248, 238, 0.85);
+  border-color: rgba(111, 207, 151, 0.35);
+}
+
+/* Read cards are slightly muted */
+.notif-card--read {
+  opacity: 0.82;
+}
+
+/* Unread indicator dot */
+.notif-unread-dot {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--forest-soft);
+  box-shadow: 0 0 0 3px rgba(31, 107, 69, 0.15);
+  flex-shrink: 0;
+}
+
+/* ── Notification icon ── */
+.notif-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+/* ── Notification body ── */
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 4px;
+  padding-right: 18px;
+  /* room for the dot */
+}
+
+.notif-card--read .notif-title {
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.notif-msg {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+
+.notif-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.notif-time {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.notif-mark-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--forest-soft);
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+
+.notif-mark-btn:hover {
+  opacity: 0.7;
+}
+
+/* ── Empty state ── */
+.notif-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  text-align: center;
+  gap: 12px;
+}
+
+.notif-empty-icon {
+  font-size: 40px;
+  line-height: 1;
+}
+
+.notif-empty p {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ── Demo note ── */
+.notif-demo-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: rgba(255, 201, 74, 0.12);
+  border: 1px solid rgba(255, 201, 74, 0.3);
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-top: 28px;
+  line-height: 1.5;
+}
+
+/* ── Buttons ── */
+.notif-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 10px 20px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+  background: none;
+  color: var(--ink);
+}
+
+.notif-btn-ghost {
+  border-color: rgba(31, 107, 69, 0.2);
+}
+
+.notif-btn-ghost:hover {
+  background: rgba(31, 107, 69, 0.07);
+}
+
+.notif-btn-sm {
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 10px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 520px) {
+  .notif-main {
+    padding: 20px 16px 40px;
+  }
+
+  .notif-filter-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .notif-card {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+
+  .notif-icon {
+    width: 34px;
+    height: 34px;
+  }
+}

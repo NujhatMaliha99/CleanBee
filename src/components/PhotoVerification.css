@@ -1,0 +1,492 @@
+/* ── Page shell ── */
+.pv-page {
+  --forest-soft: #1f6b45;
+  --leaf-glow: #6fcf97;
+  --leaf-glow-2: #a8e6bd;
+  --honey-deep: #ffc94a;
+  --ink: #123a26;
+  --ink-soft: #4c6b5b;
+  --glass: rgba(255, 255, 255, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --line: rgba(31, 107, 69, 0.12);
+
+  font-family: "Poppins", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  background: radial-gradient(120% 90% at 50% 0%, #f2fbf4 0%, #e2f5e6 45%, #cdeed6 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Top bar ── */
+.pv-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px min(5%, 40px);
+  background: rgba(242, 251, 244, 0.75);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(31, 107, 69, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.pv-logo {
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.pv-accent {
+  background: linear-gradient(120deg, var(--forest-soft), var(--leaf-glow));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.pv-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Main content area ── */
+.pv-main {
+  flex: 1;
+  padding: 32px min(5%, 40px) 56px;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── Page heading ── */
+.pv-page-head {
+  margin-bottom: 32px;
+}
+
+.pv-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  transition: color 0.15s;
+}
+
+.pv-back-link:hover {
+  color: var(--forest-soft);
+}
+
+.pv-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--forest-soft);
+  background: rgba(111, 207, 151, 0.18);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.pv-page-head h1 {
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+
+.pv-subtitle {
+  font-size: 15px;
+  color: var(--ink-soft);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ── Form ── */
+.pv-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Card section ── */
+.pv-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(18, 58, 38, 0.05);
+}
+
+.pv-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 18px;
+  padding-left: 10px;
+  border-left: 3px solid var(--forest-soft);
+}
+
+/* ── Hidden file input ── */
+.pv-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Upload zone ── */
+.pv-upload-zone {
+  width: 100%;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed rgba(31, 107, 69, 0.25);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+  padding: 24px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.pv-upload-zone:hover {
+  border-color: var(--leaf-glow);
+  background: rgba(255, 255, 255, 0.75);
+  transform: translateY(-2px);
+}
+
+.pv-upload-zone--error {
+  border-color: #d32f2f;
+}
+
+.pv-upload-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  background: rgba(111, 207, 151, 0.18);
+  border-radius: 50%;
+  color: var(--forest-soft);
+}
+
+.pv-upload-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+}
+
+.pv-upload-hint {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+/* ── Image preview ── */
+.pv-preview {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.pv-preview-img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+.pv-preview-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pv-preview-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  word-break: break-all;
+}
+
+.pv-preview-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Inline validation error (photo-specific) ── */
+.pv-field-error {
+  font-size: 11.5px;
+  color: #d32f2f;
+  font-weight: 500;
+  margin-top: 6px;
+  display: block;
+}
+
+/* ── Two-column row for date + time ── */
+.pv-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── Buttons ── */
+.pv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 12px;
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 22px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pv-btn-primary {
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--leaf-glow-2), var(--leaf-glow));
+  box-shadow: 0 8px 18px -6px rgba(31, 107, 69, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.pv-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 22px -6px rgba(31, 107, 69, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.pv-btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: rgba(31, 107, 69, 0.2);
+}
+
+.pv-btn-ghost:hover {
+  background: rgba(31, 107, 69, 0.07);
+}
+
+.pv-btn-danger {
+  background: rgba(211, 47, 47, 0.08);
+  color: #c62828;
+  border-color: rgba(211, 47, 47, 0.2);
+}
+
+.pv-btn-danger:hover {
+  background: rgba(211, 47, 47, 0.14);
+}
+
+.pv-btn-sm {
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 10px;
+}
+
+.pv-btn-submit {
+  width: 100%;
+  padding: 14px;
+  font-size: 15px;
+  border-radius: 14px;
+}
+
+/* ── Success card ── */
+.pv-success-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(18, 58, 38, 0.08);
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.pv-success-icon {
+  width: 88px;
+  height: 88px;
+  background: linear-gradient(135deg, var(--leaf-glow-2), var(--leaf-glow));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgba(111, 207, 151, 0.4);
+}
+
+.pv-success-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
+.pv-success-sub {
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin: 0 0 24px;
+  line-height: 1.6;
+}
+
+/* Summary table */
+.pv-summary {
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.pv-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13.5px;
+}
+
+.pv-summary-row:last-child {
+  border-bottom: none;
+}
+
+.pv-summary-label {
+  font-weight: 600;
+  color: var(--forest-soft);
+  flex-shrink: 0;
+}
+
+.pv-summary-value {
+  color: var(--ink);
+  text-align: right;
+  word-break: break-word;
+}
+
+.pv-demo-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: rgba(255, 201, 74, 0.12);
+  border: 1px solid rgba(255, 201, 74, 0.3);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.pv-success-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ── Reuse Dashboard form-item classes ── */
+/* .form-item, .field-error are already defined in Dashboard.css
+   but they are only loaded on /dashboard. Redeclare a minimal version
+   here so PhotoVerification works as a standalone page too. */
+.pv-page .form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.pv-page .form-item:last-child {
+  margin-bottom: 0;
+}
+
+.pv-page .form-item label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--forest-soft);
+}
+
+.pv-page .form-item input,
+.pv-page .form-item select {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(31, 107, 69, 0.18);
+  font-size: 14px;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.7);
+  outline: none;
+  transition: border-color 0.2s;
+  color: var(--ink);
+}
+
+.pv-page .form-item input:focus,
+.pv-page .form-item select:focus {
+  border-color: var(--leaf-glow);
+}
+
+.pv-page .field-error {
+  font-size: 11.5px;
+  color: #d32f2f;
+  font-weight: 500;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .pv-main {
+    padding: 20px 16px 40px;
+  }
+
+  .pv-card {
+    padding: 18px 16px;
+  }
+
+  .pv-row-two {
+    grid-template-columns: 1fr;
+  }
+
+  .pv-preview {
+    flex-direction: column;
+  }
+
+  .pv-preview-img {
+    width: 100%;
+    height: 160px;
+  }
+
+  .pv-success-card {
+    padding: 28px 18px;
+  }
+
+  .pv-success-actions {
+    flex-direction: column;
+  }
+
+  .pv-btn-submit {
+    font-size: 14px;
+    padding: 13px;
+  }
+}

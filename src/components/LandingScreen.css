@@ -658,6 +658,12 @@
   gap: 10px;
   padding: 12px;
 }
+/* Makes the photo-verification Link card look identical to the static cards */
+.cb-cell-inner--link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
 .cb-cell-icon {
   width: 40px;
   height: 40px;
