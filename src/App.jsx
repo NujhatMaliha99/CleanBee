@@ -23,7 +23,13 @@ function App() {
     () => localStorage.getItem("hasRegistered") === "true" || Boolean(localStorage.getItem("email"))
   );
 
-  const saveSession = useCallback(({ token, user }) => {
+  const saveSession = useCallback((session = {}) => {
+    const { token, user } = session;
+
+    if (!token || !user || typeof user !== "object") {
+      throw new Error("The authentication session is invalid. Please log in again.");
+    }
+
     localStorage.setItem("authToken", token);
     localStorage.setItem("firstName", user.first_name || "");
     localStorage.setItem("lastName", user.last_name || "");
@@ -52,6 +58,8 @@ function App() {
   }, [saveSession]);
 
   const handleVerified = useCallback((user) => {
+    if (!user || typeof user !== "object") return;
+
     localStorage.setItem("firstName", user.first_name || "");
     localStorage.setItem("lastName", user.last_name || "");
     localStorage.setItem("email", user.email || "");
