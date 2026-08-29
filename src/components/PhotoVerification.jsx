@@ -148,15 +148,9 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
             </p>
 
             <div className="pv-success-actions">
-              {isLoggedIn ? (
-                <Link to="/dashboard" className="pv-btn pv-btn-primary">
-                  Back to Dashboard
-                </Link>
-              ) : (
-                <Link to="/" className="pv-btn pv-btn-primary">
-                  Back to Home
-                </Link>
-              )}
+             <Link to="/" className="pv-btn pv-btn-primary">
+                Back to Home
+             </Link>
               <button
                 type="button"
                 className="pv-btn pv-btn-ghost"
@@ -189,20 +183,9 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
           Clean<span className="pv-accent">Bee</span>
         </span>
         <div className="pv-topbar-right">
-          {isLoggedIn ? (
-            <>
-              <Link to="/dashboard" className="pv-btn pv-btn-ghost pv-btn-sm">
-                Dashboard
-              </Link>
-              <button type="button" className="pv-btn pv-btn-ghost pv-btn-sm" onClick={onLogout}>
-                Log out
-              </button>
-            </>
-          ) : (
-            <Link to="/" className="pv-btn pv-btn-ghost pv-btn-sm">
-              <ArrowLeftIcon /> Home
-            </Link>
-          )}
+          <Link to="/#features" className="pv-btn pv-btn-ghost pv-btn-sm">
+  <ArrowLeftIcon /> Back
+</Link>
         </div>
       </header>
 

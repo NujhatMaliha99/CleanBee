@@ -164,24 +164,9 @@ export default function Notifications({ isLoggedIn, onLogout }) {
           Clean<span className="notif-accent">Bee</span>
         </span>
         <div className="notif-topbar-right">
-          {isLoggedIn ? (
-            <>
-              <Link to="/dashboard" className="notif-btn notif-btn-ghost notif-btn-sm">
-                Dashboard
-              </Link>
-              <button
-                type="button"
-                className="notif-btn notif-btn-ghost notif-btn-sm"
-                onClick={onLogout}
-              >
-                Log out
-              </button>
-            </>
-          ) : (
-            <Link to="/" className="notif-btn notif-btn-ghost notif-btn-sm">
-              <ArrowLeftIcon /> Home
+          <Link to="/#features" className="notif-btn notif-btn-ghost notif-btn-sm">
+              <ArrowLeftIcon /> Back
             </Link>
-          )}
         </div>
       </header>
 

@@ -113,18 +113,9 @@ export default function AreaReports({ isLoggedIn, onLogout }) {
           Clean<span className="ar-accent">Bee</span>
         </span>
         <div className="ar-topbar-right">
-          {isLoggedIn ? (
-            <>
-              <Link to="/dashboard" className="ar-btn ar-btn-ghost ar-btn-sm">Dashboard</Link>
-              <button type="button" className="ar-btn ar-btn-ghost ar-btn-sm" onClick={onLogout}>
-                Log out
-              </button>
-            </>
-          ) : (
-            <Link to="/" className="ar-btn ar-btn-ghost ar-btn-sm">
-              <ArrowLeftIcon /> Home
+          <Link to="/#features" className="ar-btn ar-btn-ghost ar-btn-sm">
+              <ArrowLeftIcon /> Back
             </Link>
-          )}
         </div>
       </header>
 
