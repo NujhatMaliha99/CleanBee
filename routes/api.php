@@ -25,6 +25,14 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
+    Route::get('/pickups', [PickupRequestController::class, 'index']);
+    Route::post('/pickups', [PickupRequestController::class, 'store']);
+    Route::get('/pickups/{pickup}', [PickupRequestController::class, 'show']);
+    Route::put('/pickups/{pickup}', [PickupRequestController::class, 'update']);
+    Route::delete('/pickups/{pickup}', [PickupRequestController::class, 'destroy']);
+    Route::get('/pickups/{pickup}/photos', [PickupPhotoController::class, 'index']);
+    Route::post('/pickups/{pickup}/photos', [PickupPhotoController::class, 'store']);
+
     // Area Reports
     Route::get('/area-reports', [AreaReportController::class, 'index']);
 
@@ -37,11 +45,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Volunteer and Admin
     Route::middleware(RoleMiddleware::class . ':volunteer,admin')->group(function () {
 
-        Route::get('/volunteer/tasks', function () {
-            return response()->json([
-                'message' => 'Volunteer dashboard tasks'
-            ]);
-        });
+        Route::get('/volunteer/tasks', [VolunteerTaskController::class, 'index']);
+        Route::get('/volunteer/my-tasks', [VolunteerTaskController::class, 'myTasks']);
+        Route::get('/volunteer/tasks/{pickup}', [VolunteerTaskController::class, 'show']);
+        Route::post('/volunteer/tasks/{pickup}/claim', [VolunteerTaskController::class, 'claim']);
+        Route::post('/volunteer/tasks/{pickup}/start', [VolunteerTaskController::class, 'start']);
+        Route::post('/volunteer/tasks/{pickup}/complete', [VolunteerTaskController::class, 'complete']);
 
         Route::post('/area-reports/{report}/assign', [
             AreaReportController::class,
