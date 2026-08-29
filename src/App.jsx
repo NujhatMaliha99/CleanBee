@@ -5,12 +5,19 @@ import LoginScreen from "./components/LoginScreen";
 import RegisterScreen from "./components/RegisterScreen";
 import LandingScreen from "./components/LandingScreen";
 import Dashboard from "./components/Dashboard";
+import VerifyEmailScreen from "./components/VerifyEmailScreen";
+import PhotoVerification from "./components/PhotoVerification";
+import AreaReports from "./components/AreaReports";
+import Notifications from "./components/Notifications";
 import { authApi } from "./services/api";
 
 function App() {
 
   const [showSplash, setShowSplash] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(() => Boolean(localStorage.getItem("authToken")));
+  const [isEmailVerified, setIsEmailVerified] = useState(
+    () => localStorage.getItem("emailVerified") === "true"
+  );
   const [needsInitialLogin, setNeedsInitialLogin] = useState(() => !localStorage.getItem("authToken"));
   const [hasRegistered, setHasRegistered] = useState(
     () => localStorage.getItem("hasRegistered") === "true" || Boolean(localStorage.getItem("email"))
@@ -21,8 +28,10 @@ function App() {
     localStorage.setItem("firstName", user.first_name || "");
     localStorage.setItem("lastName", user.last_name || "");
     localStorage.setItem("email", user.email || "");
+    localStorage.setItem("emailVerified", user.email_verified_at ? "true" : "false");
     localStorage.setItem("hasRegistered", "true");
     setIsLoggedIn(true);
+    setIsEmailVerified(Boolean(user.email_verified_at));
     setNeedsInitialLogin(false);
     setHasRegistered(true);
   }, []);
@@ -34,11 +43,21 @@ function App() {
     authApi.currentUser()
       .then(({ user }) => saveSession({ token, user }))
       .catch(() => {
-        localStorage.removeItem("authToken");
+      localStorage.removeItem("authToken");
+        localStorage.removeItem("emailVerified");
         setIsLoggedIn(false);
+        setIsEmailVerified(false);
         setNeedsInitialLogin(true);
       });
   }, [saveSession]);
+
+  const handleVerified = useCallback((user) => {
+    localStorage.setItem("firstName", user.first_name || "");
+    localStorage.setItem("lastName", user.last_name || "");
+    localStorage.setItem("email", user.email || "");
+    localStorage.setItem("emailVerified", user.email_verified_at ? "true" : "false");
+    setIsEmailVerified(Boolean(user.email_verified_at));
+  }, []);
 
   const handleLogin = async ({ email, password }) => {
     const session = await authApi.login({ email: email.trim().toLowerCase(), password });
@@ -62,7 +81,9 @@ function App() {
       // Logout locally when the server cannot revoke an expired token.
     } finally {
       localStorage.removeItem("authToken");
+      localStorage.removeItem("emailVerified");
       setIsLoggedIn(false);
+      setIsEmailVerified(false);
       setNeedsInitialLogin(true);
     }
   };
@@ -92,7 +113,7 @@ function App() {
         path="/login"
         element={
           isLoggedIn ? (
-            <Navigate to="/" replace />
+            <Navigate to={isEmailVerified ? "/" : "/verify-email"} replace />
           ) : (
             <LoginScreen
               onLogin={handleLogin}
@@ -107,7 +128,7 @@ function App() {
         path="/register"
         element={
           isLoggedIn ? (
-            <Navigate to="/" replace />
+            <Navigate to={isEmailVerified ? "/" : "/verify-email"} replace />
           ) : (
             <RegisterScreen onRegister={handleRegister} />
           )
@@ -117,9 +138,25 @@ function App() {
         path="/signup"
         element={
           isLoggedIn ? (
-            <Navigate to="/" replace />
+            <Navigate to={isEmailVerified ? "/" : "/verify-email"} replace />
           ) : (
             <RegisterScreen onRegister={handleRegister} />
+          )
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={
+          isLoggedIn && isEmailVerified ? (
+            <Navigate to="/" replace />
+          ) : (
+            <VerifyEmailScreen
+              email={localStorage.getItem("email") || "your email address"}
+              hasToken={isLoggedIn}
+              onVerified={handleVerified}
+              onLogout={handleLogout}
+            />
           )
         }
       />
@@ -128,7 +165,9 @@ function App() {
       <Route
         path="/"
         element={
-          !isLoggedIn && needsInitialLogin ? (
+          isLoggedIn && !isEmailVerified ? (
+            <Navigate to="/verify-email" replace />
+          ) : !isLoggedIn && needsInitialLogin ? (
             <Navigate to="/login" replace />
           ) : (
             <LandingScreen
@@ -144,8 +183,10 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          isLoggedIn ? (
-            <Dashboard onLogout={handleLogout} />
+          isLoggedIn && isEmailVerified ? (
+            <Dashboard onLogout={handleLogout} onUserUpdated={handleVerified} />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
           ) : (
             <Navigate to="/login" replace />
           )
@@ -154,6 +195,39 @@ function App() {
 
       {/* Backward Compatibility for /parent */}
       <Route path="/parent" element={<Navigate to="/" replace />} />
+
+      {/* Photo Verification — accessible to guests and logged-in users */}
+      <Route
+        path="/photo-verification"
+        element={
+          <PhotoVerification
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      {/* Area Reports — accessible to guests and logged-in users */}
+      <Route
+        path="/area-reports"
+        element={
+          <AreaReports
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
+        }
+      />
+
+      {/* Notifications / Instant Alerts — accessible to guests and logged-in users */}
+      <Route
+        path="/notifications"
+        element={
+          <Notifications
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
+        }
+      />
 
       {/* Fallback Route - matched na hole landing-e pathabe */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,0 +1,22 @@
+FROM composer:2 AS vendor
+
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --prefer-dist --no-scripts --optimize-autoloader
+
+FROM php:8.3-cli
+
+RUN docker-php-ext-install pdo_mysql
+
+WORKDIR /app
+COPY . .
+COPY --from=vendor /app/vendor ./vendor
+
+RUN cp .env.example .env \
+    && php artisan package:discover --ansi \
+    && rm .env \
+    && chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "php artisan migrate --force && cd public && php -S 0.0.0.0:8000 /app/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"]

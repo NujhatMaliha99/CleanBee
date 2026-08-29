@@ -2,12 +2,13 @@ const API_BASE_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "")
 
 async function request(path, options = {}) {
   const token = localStorage.getItem("authToken");
+  const isFormData = options.body instanceof FormData;
 
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json",
+      ...(!isFormData ? { "Content-Type": "application/json" } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
@@ -43,6 +44,11 @@ export const authApi = {
 
   currentUser: () => request("/me"),
 
+  resendVerification: () =>
+    request("/email/verification-notification", {
+      method: "POST",
+    }),
+
   updateProfile: (details) =>
     request("/profile", {
       method: "PUT",
@@ -53,4 +59,23 @@ export const authApi = {
     request("/logout", {
       method: "POST",
     }),
+};
+
+export const pickupApi = {
+  create: (details) =>
+    request("/pickups", {
+      method: "POST",
+      body: JSON.stringify(details),
+    }),
+
+  uploadPhoto: (pickupId, photo, photoType = "before") => {
+    const formData = new FormData();
+    formData.append("photo", photo);
+    formData.append("photo_type", photoType);
+
+    return request(`/pickups/${pickupId}/photos`, {
+      method: "POST",
+      body: formData,
+    });
+  },
 };

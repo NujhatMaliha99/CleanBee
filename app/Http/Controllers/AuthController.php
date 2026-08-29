@@ -7,6 +7,7 @@ use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,6 +26,7 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->sendEmailVerificationNotification();
 
         return response()->json([
             'message' => 'User registered successfully',
@@ -70,6 +72,37 @@ class AuthController extends Controller
         ], Response::HTTP_OK);
     }
 
+    public function resendVerification(Request $request): JsonResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Email is already verified',
+            ], Response::HTTP_OK);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json([
+            'message' => 'Verification email sent',
+        ], Response::HTTP_OK);
+    }
+
+    public function verifyEmail(Request $request, string $id)
+    {
+        $user = User::findOrFail($id);
+
+        abort_unless(
+            hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification())),
+            Response::HTTP_FORBIDDEN
+        );
+
+        if (! $user->hasVerifiedEmail() && $user->markEmailAsVerified()) {
+            event(new Verified($user));
+        }
+
+        return redirect(rtrim(config('app.frontend_url'), '/') . '/verify-email?verified=1');
+    }
+
     public function updateProfile(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -87,8 +120,13 @@ class AuthController extends Controller
         ]);
 
         $user = $request->user();
-
+        $emailChanged = strtolower($validated['email']) !== strtolower($user->email);
         $user->update($validated);
+
+        if ($emailChanged) {
+            $user->forceFill(['email_verified_at' => null])->save();
+            $user->sendEmailVerificationNotification();
+        }
 
         return response()->json([
             'message' => 'Profile updated successfully',

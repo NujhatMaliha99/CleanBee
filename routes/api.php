@@ -3,10 +3,17 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaReportController;
 use App\Http\Middleware\RoleMiddleware;
+use App\Http\Controllers\PickupRequestController;
+use App\Http\Controllers\PickupPhotoController;
+use App\Http\Controllers\VolunteerTaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+    ->middleware(['signed', 'throttle:6,1'])
+    ->name('verification.verify');
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -18,7 +25,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/profile', [AuthController::class, 'updateProfile']);
 
-
     // Area Reports
     Route::get('/area-reports', [AreaReportController::class, 'index']);
 
@@ -27,7 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/area-reports/{report}', [AreaReportController::class, 'show']);
 
     Route::put('/area-reports/{report}', [AreaReportController::class, 'update']);
-
 
     // Volunteer and Admin
     Route::middleware(RoleMiddleware::class . ':volunteer,admin')->group(function () {
@@ -48,7 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
             'resolve'
         ]);
     });
-
 
     // Admin
     Route::middleware(RoleMiddleware::class . ':admin')->group(function () {

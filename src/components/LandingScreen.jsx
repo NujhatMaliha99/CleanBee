@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./LandingScreen.css";
 
 /* Minimal line-icon set — kept in one place so the visual language stays consistent */
@@ -73,12 +73,12 @@ const STEPS = [
 ];
 
 const FEATURES = [
-  { icon: "camera", title: "Photo verification", body: "Attach a photo with every request so volunteers know exactly what to expect." },
-  { icon: "users", title: "Volunteer tasks", body: "Volunteers see nearby tasks and claim the ones they can complete." },
-  { icon: "pin", title: "Area reports", body: "Track cleanup activity and pending pickups across your neighborhood." },
-  { icon: "coin", title: "Eco point", body: "Earn points automatically the moment a pickup is confirmed." },
-  { icon: "bell", title: "Instant alert", body: "Know the second your pickup is accepted, on the way, or done." },
-  { icon: "bin", title: "Waste report submission", body: "Flag illegal dumping or an overflowing bin in seconds." },
+  { id: "photo", icon: "camera", title: "Photo verification", body: "Attach a photo with every request so volunteers know exactly what to expect." },
+  { id: "users", icon: "users", title: "Volunteer tasks", body: "Volunteers see nearby tasks and claim the ones they can complete." },
+  { id: "pin", icon: "pin", title: "Area reports", body: "Track cleanup activity and pending pickups across your neighborhood." },
+  { id: "coin", icon: "coin", title: "Eco point", body: "Earn points automatically the moment a pickup is confirmed." },
+  { id: "bell", icon: "bell", title: "Instant alert", body: "Know the second your pickup is accepted, on the way, or done." },
+  { id: "bin", icon: "bin", title: "Waste report submission", body: "Flag illegal dumping or an overflowing bin in seconds." },
 ];
 
 const REWARDS = [
@@ -95,6 +95,41 @@ const STATS = [
 ];
 
 export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
+
+  const navigate = useNavigate();
+
+  const handleFeatureClick = (featureId) => {
+    switch (featureId) {
+      case "photo":
+        navigate("/photo-verification");
+        break;
+
+      case "volunteer":
+        // Volunteer Tasks
+        break;
+
+      case "area":
+        navigate("/area-reports");
+        break;
+
+      case "eco":
+        // Eco Points
+        break;
+
+      case "alert":
+        navigate("/notifications");
+        break;
+
+      case "report":
+        // Waste Report
+        break;
+
+      default:
+        break;
+    }
+  };
+
+
   const firstName =
     typeof window !== "undefined" ? localStorage.getItem("firstName") : null;
   const [scrolled, setScrolled] = useState(false);
@@ -355,13 +390,31 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
         <div className="cb-hive">
           {FEATURES.map((f) => (
             <div className="cb-cell" key={f.title}>
-              <div className="cb-cell-inner">
-                <span className="cb-cell-icon">
-                  <Icon name={f.icon} />
-                </span>
-                <h3>{f.title}</h3>
-                <p>{f.body}</p>
-              </div>
+              {f.id === "photo" || f.id === "pin" || f.id === "bell" ? (
+                <Link
+                  to={
+                    f.id === "photo" ? "/photo-verification"
+                    : f.id === "pin"  ? "/area-reports"
+                    : "/notifications"
+                  }
+                  className="cb-cell-inner cb-cell-inner--link"
+                  aria-label={`Open ${f.title} page`}
+                >
+                  <span className="cb-cell-icon">
+                    <Icon name={f.icon} />
+                  </span>
+                  <h3>{f.title}</h3>
+                  <p>{f.body}</p>
+                </Link>
+              ) : (
+                <div className="cb-cell-inner">
+                  <span className="cb-cell-icon">
+                    <Icon name={f.icon} />
+                  </span>
+                  <h3>{f.title}</h3>
+                  <p>{f.body}</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
