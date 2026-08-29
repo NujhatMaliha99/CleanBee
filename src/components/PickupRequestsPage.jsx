@@ -144,7 +144,7 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout }) {
                 <Link to="/dashboard" className="prp-header-link">
                   Dashboard
                 </Link>
-                <Link to="/volunteer" className="prp-header-link">
+                <Link to="/volunteer/tasks" className="prp-header-link">
                   Volunteer Portal
                 </Link>
                 <button type="button" className="prp-btn-logout" onClick={onLogout}>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import { authApi } from "../services/api";
 
@@ -77,7 +78,8 @@ const PinIcon = () => (
   </svg>
 );
 
-export default function Dashboard({ onLogout, onUserUpdated }) {
+export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
+  const navigate = useNavigate();
   // User information coming from Laravel
   const [user, setUser] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
@@ -342,6 +344,16 @@ setBio(
 
         <nav className="db-nav">
           <button className="nav-btn active">Dashboard</button>
+
+          <button className="nav-btn" onClick={() => navigate("/pickup-requests")}>
+            Pickup Requests
+          </button>
+
+          {["volunteer", "admin"].includes(userRole) && (
+            <button className="nav-btn" onClick={() => navigate("/volunteer/tasks")}>
+              Volunteer Tasks
+            </button>
+          )}
 
           <button
             className="nav-btn"

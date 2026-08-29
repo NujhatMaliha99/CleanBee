@@ -9,6 +9,8 @@ import VerifyEmailScreen from "./components/VerifyEmailScreen";
 import PhotoVerification from "./components/PhotoVerification";
 import AreaReports from "./components/AreaReports";
 import Notifications from "./components/Notifications";
+import PickupRequestsPage from "./components/PickupRequestsPage";
+import VolunteerDashboard from "./components/VolunteerDashboard";
 import { authApi } from "./services/api";
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
   const [isEmailVerified, setIsEmailVerified] = useState(
     () => localStorage.getItem("emailVerified") === "true"
   );
+  const [userRole, setUserRole] = useState(() => localStorage.getItem("userRole") || "");
   const [needsInitialLogin, setNeedsInitialLogin] = useState(() => !localStorage.getItem("authToken"));
   const [hasRegistered, setHasRegistered] = useState(
     () => localStorage.getItem("hasRegistered") === "true" || Boolean(localStorage.getItem("email"))
@@ -29,9 +32,11 @@ function App() {
     localStorage.setItem("lastName", user.last_name || "");
     localStorage.setItem("email", user.email || "");
     localStorage.setItem("emailVerified", user.email_verified_at ? "true" : "false");
+    localStorage.setItem("userRole", user.role || "user");
     localStorage.setItem("hasRegistered", "true");
     setIsLoggedIn(true);
     setIsEmailVerified(Boolean(user.email_verified_at));
+    setUserRole(user.role || "user");
     setNeedsInitialLogin(false);
     setHasRegistered(true);
   }, []);
@@ -45,8 +50,10 @@ function App() {
       .catch(() => {
       localStorage.removeItem("authToken");
         localStorage.removeItem("emailVerified");
+        localStorage.removeItem("userRole");
         setIsLoggedIn(false);
         setIsEmailVerified(false);
+        setUserRole("");
         setNeedsInitialLogin(true);
       });
   }, [saveSession]);
@@ -56,7 +63,9 @@ function App() {
     localStorage.setItem("lastName", user.last_name || "");
     localStorage.setItem("email", user.email || "");
     localStorage.setItem("emailVerified", user.email_verified_at ? "true" : "false");
+    localStorage.setItem("userRole", user.role || "user");
     setIsEmailVerified(Boolean(user.email_verified_at));
+    setUserRole(user.role || "user");
   }, []);
 
   const handleLogin = async ({ email, password }) => {
@@ -82,8 +91,10 @@ function App() {
     } finally {
       localStorage.removeItem("authToken");
       localStorage.removeItem("emailVerified");
+      localStorage.removeItem("userRole");
       setIsLoggedIn(false);
       setIsEmailVerified(false);
+      setUserRole("");
       setNeedsInitialLogin(true);
     }
   };
@@ -184,7 +195,11 @@ function App() {
         path="/dashboard"
         element={
           isLoggedIn && isEmailVerified ? (
-            <Dashboard onLogout={handleLogout} onUserUpdated={handleVerified} />
+            <Dashboard
+              onLogout={handleLogout}
+              onUserUpdated={handleVerified}
+              userRole={userRole}
+            />
           ) : isLoggedIn ? (
             <Navigate to="/verify-email" replace />
           ) : (
@@ -192,6 +207,36 @@ function App() {
           )
         }
       />
+
+      <Route
+        path="/pickup-requests"
+        element={
+          isLoggedIn && isEmailVerified ? (
+            <PickupRequestsPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route
+        path="/volunteer/tasks"
+        element={
+          isLoggedIn && isEmailVerified && ["volunteer", "admin"].includes(userRole) ? (
+            <VolunteerDashboard isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          ) : isLoggedIn && !isEmailVerified ? (
+            <Navigate to="/verify-email" replace />
+          ) : isLoggedIn ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
+
+      <Route path="/volunteer" element={<Navigate to="/volunteer/tasks" replace />} />
 
       {/* Backward Compatibility for /parent */}
       <Route path="/parent" element={<Navigate to="/" replace />} />

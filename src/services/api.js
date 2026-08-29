@@ -62,6 +62,8 @@ export const authApi = {
 };
 
 export const pickupApi = {
+  getAll: () => request("/pickups"),
+
   create: (details) =>
     request("/pickups", {
       method: "POST",
@@ -78,4 +80,30 @@ export const pickupApi = {
       body: formData,
     });
   },
+
+  cancel: (pickupId) =>
+    request(`/pickups/${pickupId}`, {
+      method: "DELETE",
+    }),
+};
+
+export const volunteerApi = {
+  getAvailableTasks: () => request("/volunteer/tasks"),
+
+  getMyTasks: () => request("/volunteer/my-tasks"),
+
+  claimTask: (pickupId) =>
+    request(`/volunteer/tasks/${pickupId}/claim`, {
+      method: "POST",
+    }),
+
+  startTask: (pickupId) =>
+    request(`/volunteer/tasks/${pickupId}/start`, {
+      method: "POST",
+    }),
+
+  completeTask: (pickupId) =>
+    request(`/volunteer/tasks/${pickupId}/complete`, {
+      method: "POST",
+    }),
 };
