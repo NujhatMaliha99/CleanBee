@@ -1,0 +1,125 @@
+.pickup-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.pickup-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(5, 71, 42, 0.08);
+  border-color: rgba(46, 139, 87, 0.3);
+}
+
+.pickup-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.pickup-card__id-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pickup-card__id {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.pickup-card__waste-type {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #05472a;
+  text-transform: capitalize;
+  background: #f0fdf4;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.pickup-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pickup-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: #334155;
+}
+
+.meta-icon {
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.meta-value {
+  font-weight: 500;
+}
+
+.pickup-card__meta-item--address .meta-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 260px;
+}
+
+.pickup-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px dashed #f1f5f9;
+}
+
+.pickup-card__btn {
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  flex: 1;
+  text-align: center;
+}
+
+.pickup-card__btn--details {
+  background: #f0fdf4;
+  color: #05472a;
+  border: 1px solid #bbf7d0;
+}
+
+.pickup-card__btn--details:hover {
+  background: #05472a;
+  color: #ffffff;
+  border-color: #05472a;
+}
+
+.pickup-card__btn--cancel {
+  flex: 0 0 auto;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fee2e2;
+}
+
+.pickup-card__btn--cancel:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
