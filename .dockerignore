@@ -1,0 +1,14 @@
+.git
+.agents
+node_modules
+vendor
+dist
+mysql-data
+mysql-tmp
+.env
+*.log
+.phpunit.result.cache
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*

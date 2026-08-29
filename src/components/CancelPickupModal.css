@@ -1,0 +1,169 @@
+.cancel-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(5, 71, 42, 0.45);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.cancel-modal-card {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(5, 71, 42, 0.18);
+  overflow: hidden;
+  border: 1px solid rgba(5, 71, 42, 0.1);
+  animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cancel-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background-color: #fef2f2;
+  border-bottom: 1px solid #fee2e2;
+}
+
+.cancel-modal-icon-wrap {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cancel-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.cancel-modal-subtitle {
+  margin: 3px 0 0 0;
+  font-size: 0.84rem;
+  color: #7f1d1d;
+  opacity: 0.85;
+}
+
+.cancel-modal-body {
+  padding: 20px 24px;
+}
+
+.cancel-warning-text {
+  font-size: 0.92rem;
+  color: #4b5563;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.cancel-form-group {
+  margin-bottom: 14px;
+}
+
+.cancel-form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.cancel-form-group .req {
+  color: #dc2626;
+}
+
+.cancel-select,
+.cancel-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #d1d5db;
+  font-size: 0.9rem;
+  color: #1f2937;
+  background-color: #f9fafb;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.cancel-select:focus,
+.cancel-textarea:focus {
+  outline: none;
+  border-color: #dc2626;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12);
+}
+
+.cancel-error-msg {
+  color: #dc2626;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin: 6px 0 0 0;
+}
+
+.cancel-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  background-color: #f9fafb;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cancel-btn {
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn--secondary {
+  background-color: #ffffff;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-btn--secondary:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+.cancel-btn--danger {
+  background-color: #dc2626;
+  color: #ffffff;
+}
+
+.cancel-btn--danger:hover:not(:disabled) {
+  background-color: #b91c1c;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
