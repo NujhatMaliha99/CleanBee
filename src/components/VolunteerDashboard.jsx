@@ -308,7 +308,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
             {isLoggedIn ? (
               <>
                 <Link to="/dashboard" className="vol-header-link">
-                  User Dashboard
+                  Switch to User Dashboard
                 </Link>
                 <Link to="/pickup-requests" className="vol-header-link">
                   Pickup Requests
