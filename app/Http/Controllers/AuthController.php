@@ -26,7 +26,9 @@ class AuthController extends Controller
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
-        $user->sendEmailVerificationNotification();
+        if (config('app.require_email_verification')) {
+            $user->sendEmailVerificationNotification();
+        }
 
         return response()->json([
             'message' => 'User registered successfully',
@@ -125,7 +127,9 @@ class AuthController extends Controller
 
         if ($emailChanged) {
             $user->forceFill(['email_verified_at' => null])->save();
-            $user->sendEmailVerificationNotification();
+            if (config('app.require_email_verification')) {
+                $user->sendEmailVerificationNotification();
+            }
         }
 
         return response()->json([

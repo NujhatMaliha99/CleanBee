@@ -13,6 +13,8 @@ import PickupRequestsPage from "./components/PickupRequestsPage";
 import VolunteerDashboard from "./components/VolunteerDashboard";
 import { authApi } from "./services/api";
 
+const EMAIL_VERIFICATION_REQUIRED = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false";
+
 function App() {
 
   const [showSplash, setShowSplash] = useState(true);
@@ -100,6 +102,7 @@ function App() {
   };
 
   const navigate = useNavigate();
+  const hasVerifiedAccess = !EMAIL_VERIFICATION_REQUIRED || isEmailVerified;
 
   const handleGuestLogin = () => {
     // Guest mode — login ছাড়াই landing page-এ নিয়ে যাবে
@@ -124,7 +127,7 @@ function App() {
         path="/login"
         element={
           isLoggedIn ? (
-            <Navigate to={isEmailVerified ? "/" : "/verify-email"} replace />
+            <Navigate to={hasVerifiedAccess ? "/" : "/verify-email"} replace />
           ) : (
             <LoginScreen
               onLogin={handleLogin}
@@ -139,7 +142,7 @@ function App() {
         path="/register"
         element={
           isLoggedIn ? (
-            <Navigate to={isEmailVerified ? "/" : "/verify-email"} replace />
+            <Navigate to={hasVerifiedAccess ? "/" : "/verify-email"} replace />
           ) : (
             <RegisterScreen onRegister={handleRegister} />
           )
@@ -149,7 +152,7 @@ function App() {
         path="/signup"
         element={
           isLoggedIn ? (
-            <Navigate to={isEmailVerified ? "/" : "/verify-email"} replace />
+            <Navigate to={hasVerifiedAccess ? "/" : "/verify-email"} replace />
           ) : (
             <RegisterScreen onRegister={handleRegister} />
           )
@@ -159,7 +162,7 @@ function App() {
       <Route
         path="/verify-email"
         element={
-          isLoggedIn && isEmailVerified ? (
+          isLoggedIn && hasVerifiedAccess ? (
             <Navigate to="/" replace />
           ) : (
             <VerifyEmailScreen
@@ -176,7 +179,7 @@ function App() {
       <Route
         path="/"
         element={
-          isLoggedIn && !isEmailVerified ? (
+          isLoggedIn && !hasVerifiedAccess ? (
             <Navigate to="/verify-email" replace />
           ) : !isLoggedIn && needsInitialLogin ? (
             <Navigate to="/login" replace />
@@ -194,7 +197,7 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          isLoggedIn && isEmailVerified ? (
+          isLoggedIn && hasVerifiedAccess ? (
             <Dashboard
               onLogout={handleLogout}
               onUserUpdated={handleVerified}
@@ -211,7 +214,7 @@ function App() {
       <Route
         path="/pickup-requests"
         element={
-          isLoggedIn && isEmailVerified ? (
+          isLoggedIn && hasVerifiedAccess ? (
             <PickupRequestsPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />
           ) : isLoggedIn ? (
             <Navigate to="/verify-email" replace />
@@ -224,9 +227,9 @@ function App() {
       <Route
         path="/volunteer/tasks"
         element={
-          isLoggedIn && isEmailVerified && ["volunteer", "admin"].includes(userRole) ? (
+          isLoggedIn && hasVerifiedAccess && ["volunteer", "admin"].includes(userRole) ? (
             <VolunteerDashboard isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-          ) : isLoggedIn && !isEmailVerified ? (
+          ) : isLoggedIn && !hasVerifiedAccess ? (
             <Navigate to="/verify-email" replace />
           ) : isLoggedIn ? (
             <Navigate to="/dashboard" replace />
