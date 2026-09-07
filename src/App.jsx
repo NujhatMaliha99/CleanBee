@@ -13,7 +13,7 @@ import PickupRequestsPage from "./components/PickupRequestsPage";
 import VolunteerDashboard from "./components/VolunteerDashboard";
 import { authApi } from "./services/api";
 
-const EMAIL_VERIFICATION_REQUIRED = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false";
+const EMAIL_VERIFICATION_REQUIRED = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION === "true";
 
 function App() {
 
