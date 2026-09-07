@@ -1,6 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { volunteerApi } from "../services/api";
+import {
+  claimTask,
+  completeTask,
+  getAvailableTasks,
+  getMyTasks,
+  startTask,
+} from "../services/volunteerService";
 import VolunteerStats from "./VolunteerStats";
 import TaskFilters from "./TaskFilters";
 import VolunteerTaskList from "./VolunteerTaskList";
@@ -19,7 +25,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
 
   // Top tabs: 'available' | 'my-tasks'
   const [mainTab, setMainTab] = useState("available");
-  // Sub-tabs for My Tasks: 'accepted' | 'in_progress' | 'completed' | 'all'
+  // Sub-tabs for My Tasks: 'accepted' | 'in_progress' | 'completed'
   const [myTasksTab, setMyTasksTab] = useState("accepted");
 
   // Data states
@@ -32,8 +38,8 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
   // Filters state
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [selectedArea, setSelectedArea] = useState("all");
-  const [sortBy, setSortBy] = useState("date_asc");
+  const [pickupDate, setPickupDate] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
   // Modals state
   const [selectedTask, setSelectedTask] = useState(null);
@@ -47,14 +53,15 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
     setTimeout(() => setToastMessage(""), 4000);
   };
 
-  // Fetch Available & My Tasks from Backend
+  const normalizeStatus = (status) => (status || "").toLowerCase().replace(/[ -]/g, "_");
+
   const loadData = useCallback(() => {
     setLoading(true);
     setError("");
 
     Promise.allSettled([
-      volunteerApi.getAvailableTasks(),
-      volunteerApi.getMyTasks(),
+      getAvailableTasks(),
+      getMyTasks(),
     ])
       .then(([availableRes, myTasksRes]) => {
         if (availableRes.status === "fulfilled") {
@@ -74,7 +81,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
         if (availableRes.status === "rejected" && myTasksRes.status === "rejected") {
           setError(
             availableRes.reason?.message ||
-              "Unable to load volunteer tasks from the backend. Please check connection."
+              "Unable to load volunteer tasks. Please try again."
           );
         }
       })
@@ -90,8 +97,8 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
   useEffect(() => {
     let active = true;
     Promise.allSettled([
-      volunteerApi.getAvailableTasks(),
-      volunteerApi.getMyTasks(),
+      getAvailableTasks(),
+      getMyTasks(),
     ])
       .then(([availableRes, myTasksRes]) => {
         if (!active) return;
@@ -108,7 +115,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
         if (availableRes.status === "rejected" && myTasksRes.status === "rejected") {
           setError(
             availableRes.reason?.message ||
-              "Unable to load volunteer tasks from the backend. Please check connection."
+              "Unable to load volunteer tasks. Please try again."
           );
         }
       })
@@ -126,34 +133,20 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
     };
   }, []);
 
-  // Compute Distinct Areas for filter dropdown
-  const areas = useMemo(() => {
-    const all = [...availableTasks, ...myTasks];
-    const set = new Set();
-    all.forEach((t) => {
-      if (t.pickup_address) {
-        const parts = t.pickup_address.split(",");
-        const area = parts.length > 1 ? parts[parts.length - 2].trim() : parts[0].trim();
-        if (area) set.add(area);
-      }
-    });
-    return Array.from(set).slice(0, 10);
-  }, [availableTasks, myTasks]);
-
   // Compute Stats
   const stats = useMemo(() => {
     const acceptedCount = myTasks.filter(
-      (t) => (t.status || "").toLowerCase() === "accepted"
+      (t) => normalizeStatus(t.status) === "accepted"
     ).length;
     const inProgressCount = myTasks.filter(
-      (t) => (t.status || "").toLowerCase() === "in_progress"
+      (t) => normalizeStatus(t.status) === "in_progress"
     ).length;
     const completedCount = myTasks.filter(
-      (t) => (t.status || "").toLowerCase() === "completed"
+      (t) => normalizeStatus(t.status) === "completed"
     ).length;
 
     // Eco points calculation
-    const points = completedCount * 50 + 20 * (acceptedCount + inProgressCount);
+    const points = myTasks.reduce((total, task) => total + (Number(task.earned_points) || 0), 0);
 
     return {
       available: availableTasks.length,
@@ -174,12 +167,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
             const taskType = (task.waste_type || "").toLowerCase();
             if (taskType !== categoryFilter.toLowerCase()) return false;
           }
-          // Area
-          if (selectedArea !== "all") {
-            if (!task.pickup_address?.toLowerCase().includes(selectedArea.toLowerCase())) {
-              return false;
-            }
-          }
+          if (pickupDate && task.pickup_date !== pickupDate) return false;
           // Search query
           if (searchQuery.trim()) {
             const q = searchQuery.toLowerCase();
@@ -192,22 +180,13 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
           return true;
         })
         .sort((a, b) => {
-          if (sortBy === "date_asc") {
-            return new Date(a.pickup_date || a.created_at) - new Date(b.pickup_date || b.created_at);
-          }
-          if (sortBy === "date_desc") {
-            return new Date(b.pickup_date || b.created_at) - new Date(a.pickup_date || a.created_at);
-          }
-          if (sortBy === "quantity_desc") {
-            return Number(b.quantity || 0) - Number(a.quantity || 0);
-          }
-          if (sortBy === "quantity_asc") {
-            return Number(a.quantity || 0) - Number(b.quantity || 0);
-          }
+          if (sortBy === "pickup_asc") return new Date(`${a.pickup_date}T${a.pickup_time}`) - new Date(`${b.pickup_date}T${b.pickup_time}`);
+          if (sortBy === "distance_asc") return parseFloat(a.distance) - parseFloat(b.distance);
+          if (sortBy === "newest") return new Date(b.created_at) - new Date(a.created_at);
           return 0;
         });
     },
-    [categoryFilter, selectedArea, searchQuery, sortBy]
+    [categoryFilter, pickupDate, searchQuery, sortBy]
   );
 
   const displayedAvailableTasks = useMemo(() => {
@@ -218,7 +197,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
     let filtered = myTasks;
     if (myTasksTab !== "all") {
       filtered = myTasks.filter(
-        (t) => (t.status || "").toLowerCase().replace("-", "_") === myTasksTab
+        (t) => (t.status || "").toLowerCase().replace(/[ -]/g, "_") === myTasksTab
       );
     }
     return filterAndSort(filtered);
@@ -250,13 +229,13 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
       setIsSubmittingAction(true);
 
       if (confirmActionType === "claim") {
-        await volunteerApi.claimTask(taskId);
+        await claimTask(taskId);
         showToast(`Task #${taskId} claimed successfully! Moved to My Tasks.`);
       } else if (confirmActionType === "start") {
-        await volunteerApi.startTask(taskId);
+        await startTask(taskId);
         showToast(`Pickup #${taskId} started! Status updated to In Progress.`);
       } else if (confirmActionType === "complete") {
-        await volunteerApi.completeTask(taskId);
+        await completeTask(taskId);
         showToast(`Pickup #${taskId} completed successfully! Eco Points awarded.`);
       }
 
@@ -264,7 +243,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
       await loadData();
     } catch (err) {
       console.error("Action error:", err);
-      alert(err.message || "Failed to update task status.");
+      setError(err.message || "Failed to update task status.");
     } finally {
       setIsSubmittingAction(false);
     }
@@ -273,8 +252,8 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
   const handleResetFilters = () => {
     setSearchQuery("");
     setCategoryFilter("all");
-    setSelectedArea("all");
-    setSortBy("date_asc");
+    setPickupDate("");
+    setSortBy("newest");
   };
 
   return (
@@ -391,31 +370,25 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
               >
                 Completed ({stats.completed})
               </button>
-              <button
-                type="button"
-                className={`vol-sub-tab-btn ${myTasksTab === "all" ? "active" : ""}`}
-                onClick={() => setMyTasksTab("all")}
-              >
-                All My Tasks ({myTasks.length})
-              </button>
             </div>
           )}
 
           {/* Filters Bar */}
-          <div className="vol-filters-section">
-            <TaskFilters
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              categoryFilter={categoryFilter}
-              onCategoryChange={setCategoryFilter}
-              selectedArea={selectedArea}
-              onAreaChange={setSelectedArea}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              areas={areas}
-              onReset={handleResetFilters}
-            />
-          </div>
+          {mainTab === "available" && (
+            <div className="vol-filters-section">
+              <TaskFilters
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                categoryFilter={categoryFilter}
+                onCategoryChange={setCategoryFilter}
+                pickupDate={pickupDate}
+                onPickupDateChange={setPickupDate}
+                sortBy={sortBy}
+                onSortChange={setSortBy}
+                onReset={handleResetFilters}
+              />
+            </div>
+          )}
 
           {/* Task Grid View */}
           <div className="vol-tasks-section">

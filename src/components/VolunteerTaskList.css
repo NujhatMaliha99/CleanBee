@@ -4,6 +4,32 @@
   gap: 16px;
 }
 
+.volunteer-card--skeleton {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+.skeleton-line {
+  display: block;
+  width: 78%;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s infinite;
+}
+
+.skeleton-line--wide { width: 92%; height: 18px; }
+.skeleton-line--short { width: 54%; }
+.skeleton-line--button { width: 42%; height: 32px; margin-top: auto; }
+
+@keyframes skeleton-shimmer {
+  to { background-position: -200% 0; }
+}
+
 .vol-list-state {
   display: flex;
   flex-direction: column;

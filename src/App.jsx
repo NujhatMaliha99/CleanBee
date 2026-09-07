@@ -209,17 +209,21 @@ function App() {
       />
 
       <Route
-        path="/pickup-requests"
-        element={
-          isLoggedIn && isEmailVerified ? (
-            <PickupRequestsPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />
-          ) : isLoggedIn ? (
-            <Navigate to="/verify-email" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
+  path="/pickup-requests"
+  element={
+    isLoggedIn && isEmailVerified ? (
+      <PickupRequestsPage
+        isLoggedIn={isLoggedIn}
+        onLogout={handleLogout}
+        userRole={userRole}
       />
+    ) : isLoggedIn ? (
+      <Navigate to="/verify-email" replace />
+    ) : (
+      <Navigate to="/login" replace />
+    )
+  }
+/>
 
       <Route
         path="/volunteer/tasks"

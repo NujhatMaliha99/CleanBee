@@ -82,7 +82,10 @@
 }
 
 .prp-logo span {
-  color: #ffc94a;
+  background: linear-gradient(120deg, #1f6b45, #6fcf97);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .prp-header-right {

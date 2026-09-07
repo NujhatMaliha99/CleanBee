@@ -16,18 +16,17 @@ export default function TaskFilters({
   onSearchChange,
   categoryFilter,
   onCategoryChange,
+  pickupDate,
+  onPickupDateChange,
   sortBy,
   onSortChange,
-  areas = [],
-  selectedArea,
-  onAreaChange,
   onReset,
 }) {
   const hasActiveFilters =
     Boolean(searchQuery) ||
     categoryFilter !== "all" ||
-    (selectedArea && selectedArea !== "all") ||
-    sortBy !== "date_asc";
+    Boolean(pickupDate) ||
+    sortBy !== "newest";
 
   return (
     <div className="task-filters-card">
@@ -40,7 +39,7 @@ export default function TaskFilters({
           </svg>
           <input
             type="text"
-            placeholder="Search by area, requester, or waste type..."
+            placeholder="Search by request ID or address..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="filter-search-input"
@@ -73,25 +72,16 @@ export default function TaskFilters({
           </select>
         </div>
 
-        {/* Area dropdown (if areas provided) */}
-        {areas.length > 0 && (
-          <div className="filter-select-group">
-            <label htmlFor="area-filter-select">Area:</label>
-            <select
-              id="area-filter-select"
-              value={selectedArea || "all"}
-              onChange={(e) => onAreaChange(e.target.value)}
-              className="filter-select"
-            >
-              <option value="all">All Areas</option>
-              {areas.map((area) => (
-                <option key={area} value={area}>
-                  {area}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div className="filter-select-group">
+          <label htmlFor="pickup-date-filter">Pickup date:</label>
+          <input
+            id="pickup-date-filter"
+            type="date"
+            value={pickupDate}
+            onChange={(event) => onPickupDateChange(event.target.value)}
+            className="filter-select"
+          />
+        </div>
 
         {/* Sort Select */}
         <div className="filter-select-group">
@@ -102,10 +92,9 @@ export default function TaskFilters({
             onChange={(e) => onSortChange(e.target.value)}
             className="filter-select"
           >
-            <option value="date_asc">Earliest Date</option>
-            <option value="date_desc">Latest Date</option>
-            <option value="quantity_desc">Highest Volume</option>
-            <option value="quantity_asc">Lowest Volume</option>
+            <option value="newest">Newest Request</option>
+            <option value="pickup_asc">Earliest Pickup</option>
+            <option value="distance_asc">Nearest Location</option>
           </select>
         </div>
 

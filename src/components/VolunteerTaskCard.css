@@ -53,6 +53,19 @@
   gap: 8px;
 }
 
+.volunteer-card__instructions {
+  margin: 10px 0 0;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.volunteer-card__created {
+  margin: 6px 0 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
 .volunteer-card__meta-row {
   display: flex;
   align-items: center;

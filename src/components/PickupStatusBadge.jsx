@@ -9,7 +9,7 @@ const STATUS_CONFIG = {
 };
 
 export default function PickupStatusBadge({ status = "pending", size = "normal" }) {
-  const normalized = (status || "").toLowerCase().replace("-", "_");
+  const normalized = (status || "").toLowerCase().replace(/[ -]/g, "_");
   const config = STATUS_CONFIG[normalized] || {
     label: status || "Unknown",
     className: "pickup-status--default",

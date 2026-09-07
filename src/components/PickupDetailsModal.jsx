@@ -153,7 +153,7 @@ export default function PickupDetailsModal({ pickup, isOpen, onClose, onCancelCl
 
         {/* Footer */}
         <div className="pickup-details-footer">
-          {pickup.status === "pending" && onCancelClick && (
+          {String(pickup.status).toLowerCase() === "pending" && onCancelClick && (
             <button
               className="pickup-modal-cancel-action-btn"
               onClick={() => {
