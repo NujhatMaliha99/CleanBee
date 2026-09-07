@@ -236,9 +236,9 @@ export default function PhotoVerification({ isLoggedIn, onLogout }) {
         {/* Page heading */}
         <div className="pv-page-head">
           
-          <h1>Photo Verification</h1>
+          <h1>Pickup Request</h1>
           <p className="pv-subtitle">
-            Upload a photo of your waste so the collector knows what to expect.
+            Submit a waste pickup request with photo and location details.
           </p>
         </div>
 
