@@ -14,7 +14,7 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_user_can_register_successfully(): void
+    public function test_registration_skips_verification_when_feature_is_paused(): void
     {
         Notification::fake();
 
@@ -32,7 +32,7 @@ class AuthTest extends TestCase
             'email' => 'nujhat@example.com',
         ]);
 
-        Notification::assertSentTo(User::where('email', 'nujhat@example.com')->first(), VerifyEmail::class);
+        Notification::assertNotSentTo(User::where('email', 'nujhat@example.com')->first(), VerifyEmail::class);
     }
 
     public function test_user_can_verify_email_from_signed_link(): void
@@ -55,7 +55,7 @@ class AuthTest extends TestCase
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
     }
 
-    public function test_user_can_resend_verification_email(): void
+    public function test_resend_endpoint_is_unavailable_when_feature_is_paused(): void
     {
         Notification::fake();
 
@@ -67,13 +67,12 @@ class AuthTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/email/verification-notification')
-            ->assertOk()
-            ->assertJson(['message' => 'Verification email sent']);
+            ->assertNotFound();
 
-        Notification::assertSentTo($user, VerifyEmail::class);
+        Notification::assertNotSentTo($user, VerifyEmail::class);
     }
 
-    public function test_unverified_user_cannot_update_profile(): void
+    public function test_unverified_user_can_update_profile_when_feature_is_paused(): void
     {
         $user = User::create([
             'first_name' => 'Nujhat',
@@ -86,7 +85,7 @@ class AuthTest extends TestCase
                 'first_name' => 'Updated',
                 'email' => $user->email,
             ])
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_registration_validation_fails_for_invalid_email(): void
