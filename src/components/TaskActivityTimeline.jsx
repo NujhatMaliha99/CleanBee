@@ -16,7 +16,32 @@ function formatDateTime(dt) {
 export default function TaskActivityTimeline({ task }) {
   if (!task) return null;
 
-  const currentStatus = (task.status || "pending").toLowerCase().replace("-", "_");
+  const currentStatus = (task.status || "pending").toLowerCase().replace(/[ -]/g, "_");
+
+  if (task.activity_timeline?.length) {
+    return (
+      <div className="task-timeline">
+        <h4 className="task-timeline__heading">Task Activity Timeline</h4>
+        <div className="task-timeline__list">
+          {task.activity_timeline.map((activity, index) => (
+            <div className="timeline-item is-done" key={`${activity.title}-${activity.timestamp}-${index}`}>
+              <div className="timeline-connector">
+                <div className="timeline-dot"><span>✓</span></div>
+                {index < task.activity_timeline.length - 1 && <div className="timeline-line" />}
+              </div>
+              <div className="timeline-content">
+                <div className="timeline-header-row">
+                  <span className="timeline-title">{activity.title}</span>
+                  <span className="timeline-time">{formatDateTime(activity.timestamp)}</span>
+                </div>
+                <p className="timeline-desc">{activity.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   // Determine which step is currently reached
   const steps = [

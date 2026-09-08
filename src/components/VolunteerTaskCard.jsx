@@ -8,7 +8,7 @@ export default function VolunteerTaskCard({
   onStart,
   onComplete,
 }) {
-  const status = (task.status || "pending").toLowerCase().replace("-", "_");
+  const status = (task.status || "pending").toLowerCase().replace(/[ -]/g, "_");
 
   const formatDate = (d) => {
     if (!d) return "";
@@ -20,7 +20,9 @@ export default function VolunteerTaskCard({
     });
   };
 
-  // Estimated points earned for completing this task (e.g. 5 pts per kg / min 20 pts)
+  const formatDateTime = (d) => (d ? new Date(d).toLocaleString("en-US", {
+    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+  }) : "Not available");
   const ecoPoints = Math.max(20, Math.round(Number(task.quantity || 1) * 5));
 
   return (
@@ -57,12 +59,23 @@ export default function VolunteerTaskCard({
           </span>
         </div>
 
+        <div className="vol-meta-item">
+          <span className="meta-ico">📏</span>
+          <span className="meta-txt">Approx. {task.distance || "Distance unavailable"}</span>
+        </div>
+
         <div className="vol-meta-item vol-meta-item--address">
           <span className="meta-ico">📍</span>
           <span className="meta-txt truncate" title={task.pickup_address}>
             {task.pickup_address || "Address available after claim"}
           </span>
         </div>
+
+        <p className="volunteer-card__instructions">{task.instructions || "No special instructions."}</p>
+        <p className="volunteer-card__created">Requested {formatDateTime(task.created_at)}</p>
+        {status === "completed" && (
+          <p className="volunteer-card__created">Completed {formatDateTime(task.completed_at)}</p>
+        )}
 
         {task.user?.first_name && (
           <div className="vol-meta-item vol-meta-item--user">
@@ -81,7 +94,7 @@ export default function VolunteerTaskCard({
           className="vol-btn vol-btn--details"
           onClick={() => onViewDetails(task)}
         >
-          Details
+          View Details
         </button>
 
         {(status === "pending" || status === "available") && onClaim && (
@@ -90,7 +103,7 @@ export default function VolunteerTaskCard({
             className="vol-btn vol-btn--claim"
             onClick={() => onClaim(task)}
           >
-            🤝 Claim
+            Claim Task
           </button>
         )}
 
@@ -100,7 +113,7 @@ export default function VolunteerTaskCard({
             className="vol-btn vol-btn--start"
             onClick={() => onStart(task)}
           >
-            🚚 Start
+            Start Pickup
           </button>
         )}
 
@@ -110,12 +123,12 @@ export default function VolunteerTaskCard({
             className="vol-btn vol-btn--complete"
             onClick={() => onComplete(task)}
           >
-            ✓ Complete
+            Complete Pickup
           </button>
         )}
 
         {status === "completed" && (
-          <span className="vol-completed-tag">✓ Done</span>
+          <span className="vol-completed-tag">✓ Done · +{task.earned_points || ecoPoints} pts</span>
         )}
       </div>
     </div>

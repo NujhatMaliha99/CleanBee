@@ -15,9 +15,16 @@ export default function VolunteerTaskList({
 }) {
   if (loading) {
     return (
-      <div className="vol-list-state vol-list-state--loading">
-        <div className="vol-spinner" />
-        <p>Loading volunteer tasks...</p>
+      <div className="volunteer-task-grid volunteer-task-grid--skeleton" aria-label="Loading tasks">
+        {[1, 2, 3].map((skeleton) => (
+          <div className="volunteer-card volunteer-card--skeleton" key={skeleton}>
+            <span className="skeleton-line skeleton-line--wide" />
+            <span className="skeleton-line" />
+            <span className="skeleton-line skeleton-line--short" />
+            <span className="skeleton-line" />
+            <span className="skeleton-line skeleton-line--button" />
+          </div>
+        ))}
       </div>
     );
   }

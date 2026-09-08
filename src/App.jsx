@@ -215,7 +215,11 @@ function App() {
         path="/pickup-requests"
         element={
           isLoggedIn && hasVerifiedAccess ? (
-            <PickupRequestsPage isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+            <PickupRequestsPage
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+              userRole={userRole}
+            />
           ) : isLoggedIn ? (
             <Navigate to="/verify-email" replace />
           ) : (

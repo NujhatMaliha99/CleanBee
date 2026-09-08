@@ -427,10 +427,6 @@ setBio(
               <h3>Quick Actions</h3>
 
               <div className="action-buttons">
-                <button onClick={() => setShowModal("pickup")}>
-                  Request Pickup
-                </button>
-
                 <button
                   onClick={() =>
                     document
@@ -443,10 +439,6 @@ setBio(
 
                 <button onClick={() => setShowModal("guide")}>
                   Recycle Guide
-                </button>
-
-                <button onClick={() => setShowModal("profile")}>
-                  Edit Profile
                 </button>
               </div>
             </section>

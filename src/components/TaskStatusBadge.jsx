@@ -10,7 +10,7 @@ const TASK_STATUSES = {
 };
 
 export default function TaskStatusBadge({ status = "available", size = "normal" }) {
-  const normalized = (status || "").toLowerCase().replace("-", "_");
+  const normalized = (status || "").toLowerCase().replace(/[ -]/g, "_");
   const config = TASK_STATUSES[normalized] || {
     label: status || "Unknown",
     className: "task-badge--default",

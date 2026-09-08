@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { pickupApi } from "../services/api";
+import { cancelPickup, getMyPickups } from "../services/pickupService";
 import PickupRequestForm from "./PickupRequestForm";
 import PickupRequestList from "./PickupRequestList";
 import PickupDetailsModal from "./PickupDetailsModal";
@@ -20,7 +20,7 @@ const PlusIcon = () => (
   </svg>
 );
 
-export default function PickupRequestsPage({ isLoggedIn, onLogout }) {
+export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("list"); // 'list' | 'create'
@@ -43,8 +43,7 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout }) {
   const fetchPickups = useCallback(() => {
     setLoading(true);
     setError("");
-    pickupApi
-      .getAll()
+    getMyPickups()
       .then((response) => {
         const items = response.data || response || [];
         setPickups(Array.isArray(items) ? items : []);
@@ -60,8 +59,7 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout }) {
 
   useEffect(() => {
     let active = true;
-    pickupApi
-      .getAll()
+    getMyPickups()
       .then((response) => {
         if (!active) return;
         const items = response.data || response || [];
@@ -94,7 +92,7 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout }) {
   const handleConfirmCancel = async (id, reason) => {
     try {
       setIsCancelling(true);
-      await pickupApi.cancel(id);
+      await cancelPickup(id);
       showToast(`Pickup request #${id} was cancelled (${reason || "by user"}).`);
       setPickupToCancel(null);
       fetchPickups();
@@ -144,9 +142,11 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout }) {
                 <Link to="/dashboard" className="prp-header-link">
                   Dashboard
                 </Link>
-                <Link to="/volunteer/tasks" className="prp-header-link">
-                  Volunteer Portal
-                </Link>
+                {["volunteer", "admin"].includes(userRole) && (
+                  <Link to="/volunteer/tasks" className="prp-header-link">
+                    Volunteer Portal
+                  </Link>
+                )}
                 <button type="button" className="prp-btn-logout" onClick={onLogout}>
                   Logout
                 </button>

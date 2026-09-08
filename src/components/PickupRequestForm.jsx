@@ -1,15 +1,15 @@
 import { useState, useRef } from "react";
-import { pickupApi } from "../services/api";
+import { createPickup } from "../services/pickupService";
 import "./PickupRequestForm.css";
 
 const WASTE_CATEGORIES = [
-  { value: "plastic", label: "Plastic & Bottles", icon: "🍾" },
-  { value: "organic", label: "Organic & Food Waste", icon: "🍎" },
-  { value: "paper", label: "Paper & Cardboard", icon: "📦" },
-  { value: "e-waste", label: "E-Waste & Electronics", icon: "💻" },
-  { value: "glass", label: "Glass & Ceramics", icon: "🥛" },
-  { value: "metal", label: "Metal & Cans", icon: "🥫" },
-  { value: "mixed", label: "Mixed / General Waste", icon: "🗑️" },
+  { value: "plastic", label: "Plastic", icon: "🍾" },
+  { value: "organic", label: "Organic Waste", icon: "🍎" },
+  { value: "paper", label: "Paper and Cardboard", icon: "📦" },
+  { value: "e-waste", label: "E-Waste", icon: "💻" },
+  { value: "glass", label: "Glass", icon: "🥛" },
+  { value: "metal", label: "Metal", icon: "🥫" },
+  { value: "mixed", label: "Mixed Waste", icon: "🗑️" },
 ];
 
 const QUANTITY_UNITS = [
@@ -22,8 +22,8 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
   const fileInputRef = useRef(null);
 
   // Form Fields
-  const [wasteType, setWasteType] = useState("plastic");
-  const [quantity, setQuantity] = useState("5");
+  const [wasteType, setWasteType] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [quantityUnit, setQuantityUnit] = useState("kg");
   const [pickupAddress, setPickupAddress] = useState(() => localStorage.getItem("address") || "");
   const [pickupDate, setPickupDate] = useState(() => {
@@ -31,7 +31,7 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
     tomorrow.setDate(tomorrow.getDate() + 1);
     return tomorrow.toISOString().split("T")[0];
   });
-  const [pickupTime, setPickupTime] = useState("10:00");
+  const [pickupTime, setPickupTime] = useState("");
   const [contactPhone, setContactPhone] = useState(() => localStorage.getItem("phone") || "");
   const [instructions, setInstructions] = useState("");
   const [photo, setPhoto] = useState(null); // { file, preview, name }
@@ -50,11 +50,6 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
 
     if (!file.type.match(/image\/(jpeg|jpg|png|webp)/i)) {
       setErrors((prev) => ({ ...prev, photo: "Only JPG, PNG, or WEBP images are supported." }));
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors((prev) => ({ ...prev, photo: "Photo size must be under 5MB." }));
       return;
     }
 
@@ -109,27 +104,31 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
     setIsSubmitting(true);
 
     try {
-      // Build FormData for multipart request (matching Laravel StorePickupRequest)
-      const formData = new FormData();
-      formData.append("waste_type", wasteType);
-      formData.append("quantity", Number(quantity));
-      formData.append("quantity_unit", quantityUnit);
-      formData.append("pickup_address", pickupAddress.trim());
-      formData.append("pickup_date", pickupDate);
-      formData.append("pickup_time", pickupTime);
-      formData.append("contact_phone", contactPhone.trim());
-      if (instructions.trim()) {
-        formData.append("instructions", instructions.trim());
-      }
-      if (photo?.file) {
-        formData.append("image", photo.file);
-      }
-
-      const response = await pickupApi.create(formData);
+      const response = await createPickup({
+        waste_type: WASTE_CATEGORIES.find((category) => category.value === wasteType)?.label,
+        quantity: Number(quantity),
+        quantity_unit: quantityUnit,
+        pickup_address: pickupAddress.trim(),
+        pickup_date: pickupDate,
+        pickup_time: pickupTime,
+        contact_phone: contactPhone.trim(),
+        instructions: instructions.trim(),
+        image: photo?.file || null,
+        previewUrl: photo?.preview || null,
+      });
       setSubmitSuccess(true);
 
       setTimeout(() => {
-        onSuccess?.(response.data || response);
+        setWasteType("");
+        setQuantity("");
+        setPickupAddress("");
+        setPickupDate("");
+        setPickupTime("");
+        setContactPhone("");
+        setInstructions("");
+        handleRemovePhoto();
+        setSubmitSuccess(false);
+        onSuccess?.(response);
       }, 1200);
     } catch (err) {
       console.error("Pickup creation failed:", err);
@@ -354,7 +353,7 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
                 <p className="dropzone-prompt">
                   <strong>Click to upload</strong> or drag photo here
                 </p>
-                <span className="dropzone-hint">PNG, JPG or WEBP (Max 5MB)</span>
+                <span className="dropzone-hint">JPEG, PNG or WEBP</span>
               </div>
             </div>
           ) : (

@@ -34,7 +34,7 @@ export default function TaskDetailsModal({
   };
 
   const imageUrl = getImageUrl(task.image_path || task.previewUrl || task.image);
-  const status = (task.status || "pending").toLowerCase().replace("-", "_");
+  const status = (task.status || "pending").toLowerCase().replace(/[ -]/g, "_");
 
   return (
     <div className="task-details-overlay" onClick={onClose} role="dialog" aria-modal="true">
