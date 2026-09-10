@@ -73,12 +73,8 @@ const STEPS = [
 ];
 
 const FEATURES = [
-  { id: "photo", icon: "camera", title: "Photo verification", body: "Attach a photo with every request so volunteers know exactly what to expect." },
-  { id: "users", icon: "users", title: "Volunteer tasks", body: "Volunteers see nearby tasks and claim the ones they can complete." },
+  { id: "photo", icon: "camera", title: "Pickup request", body: "Submit a pickup request with details and photos so volunteers can assist you." },
   { id: "pin", icon: "pin", title: "Area reports", body: "Track cleanup activity and pending pickups across your neighborhood." },
-  { id: "coin", icon: "coin", title: "Eco point", body: "Earn points automatically the moment a pickup is confirmed." },
-  { id: "bell", icon: "bell", title: "Instant alert", body: "Know the second your pickup is accepted, on the way, or done." },
-  { id: "bin", icon: "bin", title: "Waste report submission", body: "Flag illegal dumping or an overflowing bin in seconds." },
 ];
 
 const REWARDS = [
@@ -285,8 +281,8 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
             <div className="cb-hero-actions">
               {isLoggedIn ? (
                 <>
-                  <Link to="/dashboard" className="cb-btn cb-btn-primary cb-btn-lg">
-                    Go to your dashboard
+                  <Link to="/notifications" className="cb-btn cb-btn-primary cb-btn-lg">
+                    Instant alert
                   </Link>
                   <a href="#rewards" className="cb-btn cb-btn-outline cb-btn-lg">
                     See your eco rewards
@@ -390,13 +386,9 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
         <div className="cb-hive">
           {FEATURES.map((f) => (
             <div className="cb-cell" key={f.title}>
-              {f.id === "photo" || f.id === "pin" || f.id === "bell" ? (
+              {f.id === "photo" || f.id === "pin" ? (
                 <Link
-                  to={
-                    f.id === "photo" ? "/photo-verification"
-                    : f.id === "pin"  ? "/area-reports"
-                    : "/notifications"
-                  }
+                  to={f.id === "photo" ? "/photo-verification" : "/area-reports"}
                   className="cb-cell-inner cb-cell-inner--link"
                   aria-label={`Open ${f.title} page`}
                 >

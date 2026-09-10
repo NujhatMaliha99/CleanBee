@@ -56,6 +56,8 @@ return [
 
     'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
 
+    'require_email_verification' => env('REQUIRE_EMAIL_VERIFICATION', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
