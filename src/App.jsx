@@ -248,36 +248,54 @@ function App() {
       {/* Backward Compatibility for /parent */}
       <Route path="/parent" element={<Navigate to="/" replace />} />
 
-      {/* Photo Verification — accessible to guests and logged-in users */}
+      {/* Photo Verification */}
       <Route
         path="/photo-verification"
         element={
-          <PhotoVerification
-            isLoggedIn={isLoggedIn}
-            onLogout={handleLogout}
-          />
+          isLoggedIn && hasVerifiedAccess ? (
+            <PhotoVerification
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+            />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/" replace />
+          )
         }
       />
 
-      {/* Area Reports — accessible to guests and logged-in users */}
+      {/* Area Reports */}
       <Route
         path="/area-reports"
         element={
-          <AreaReports
-            isLoggedIn={isLoggedIn}
-            onLogout={handleLogout}
-          />
+          isLoggedIn && hasVerifiedAccess ? (
+            <AreaReports
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+            />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/" replace />
+          )
         }
       />
 
-      {/* Notifications / Instant Alerts — accessible to guests and logged-in users */}
+      {/* Notifications / Instant Alerts */}
       <Route
         path="/notifications"
         element={
-          <Notifications
-            isLoggedIn={isLoggedIn}
-            onLogout={handleLogout}
-          />
+          isLoggedIn && hasVerifiedAccess ? (
+            <Notifications
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+            />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/" replace />
+          )
         }
       />
 
