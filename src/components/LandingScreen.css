@@ -649,6 +649,12 @@
 .cb-cell:hover {
   transform: translateY(-6px);
 }
+.cb-cell--disabled {
+  pointer-events: none;
+}
+.cb-cell--disabled:hover {
+  transform: none;
+}
 .cb-cell-inner {
   width: 78%;
   text-align: center;
@@ -663,6 +669,9 @@
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+}
+.cb-cell-inner--disabled {
+  cursor: default;
 }
 .cb-cell-icon {
   width: 40px;

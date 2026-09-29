@@ -385,8 +385,11 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
         </div>
         <div className="cb-hive">
           {FEATURES.map((f) => (
-            <div className="cb-cell" key={f.title}>
-              {f.id === "photo" || f.id === "pin" ? (
+            <div
+              className={`cb-cell${isLoggedIn ? "" : " cb-cell--disabled"}`}
+              key={f.title}
+            >
+              {isLoggedIn && (f.id === "photo" || f.id === "pin") ? (
                 <Link
                   to={f.id === "photo" ? "/photo-verification" : "/area-reports"}
                   className="cb-cell-inner cb-cell-inner--link"
@@ -399,7 +402,10 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
                   <p>{f.body}</p>
                 </Link>
               ) : (
-                <div className="cb-cell-inner">
+                <div
+                  className={`cb-cell-inner${isLoggedIn ? "" : " cb-cell-inner--disabled"}`}
+                  aria-disabled={isLoggedIn ? undefined : "true"}
+                >
                   <span className="cb-cell-icon">
                     <Icon name={f.icon} />
                   </span>
