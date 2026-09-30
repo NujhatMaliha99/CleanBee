@@ -13,6 +13,32 @@ const MOCK_PICKUPS = [
     status: "Pending",
     created_at: "2026-09-03T09:30:00Z",
   },
+  {
+    id: 4122,
+    waste_type: "Paper and Cardboard",
+    quantity: 2,
+    quantity_unit: "bags",
+    pickup_address: "18 Lake Drive, Gulshan, Dhaka",
+    pickup_date: "2026-09-05",
+    pickup_time: "14:30",
+    contact_phone: "+880 1800-000000",
+    assigned_volunteer: { first_name: "Arif", last_name: "Hasan" },
+    status: "Accepted",
+    created_at: "2026-09-01T12:00:00Z",
+  },
+  {
+    id: 4104,
+    waste_type: "E-Waste",
+    quantity: 3,
+    quantity_unit: "items",
+    pickup_address: "7/A Central Road, Mirpur, Dhaka",
+    pickup_date: "2026-08-28",
+    pickup_time: "09:00",
+    contact_phone: "+880 1900-000000",
+    assigned_volunteer: { first_name: "Mina", last_name: "Akter" },
+    status: "Completed",
+    created_at: "2026-08-25T08:00:00Z",
+  },
 ];
 
 let pickups = [...MOCK_PICKUPS];

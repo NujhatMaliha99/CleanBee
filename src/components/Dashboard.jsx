@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 import { authApi } from "../services/api";
 
+// SVG Icons
 const BellIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9m-5 12a2 2 0 0 1-4 0" />
@@ -79,10 +80,12 @@ const PinIcon = () => (
 
 export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
   const navigate = useNavigate();
+  // User information coming from Laravel
   const [user, setUser] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
 
+  // Existing local profile information that is not yet in the database
   const [phone, setPhone] = useState(() => localStorage.getItem("phone") || "");
   const [address, setAddress] = useState(() => localStorage.getItem("address") || "");
   const [bio, setBio] = useState(
@@ -91,15 +94,18 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
 
   const [showModal, setShowModal] = useState(null);
 
+  // These will be connected to the database later
   const [stats, setStats] = useState({
-    total: 1,
-    completed: 0,
-    pending: 1,
-    points: 10,
+    total: 12,
+    completed: 8,
+    pending: 4,
+    points: 150,
   });
 
   const [activities, setActivities] = useState([
-    { id: 101, status: "Pending", text: "Request #101 Pending (Plastic)" },
+    { id: 103, status: "In Progress", text: "Request #103 In Progress" },
+    { id: 102, status: "Pending", text: "Request #102 Pending" },
+    { id: 101, status: "Completed", text: "Request #101 Completed" },
   ]);
 
   const [inputName, setInputName] = useState("");
@@ -112,6 +118,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
   const [errors, setErrors] = useState({});
   const [toast, setToast] = useState("");
 
+  // Get the logged-in user from Laravel
   useEffect(() => {
     const loadUser = async () => {
       try {
@@ -119,17 +126,24 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
         setProfileError("");
 
         const response = await authApi.currentUser();
+
         setUser(response.user);
 
-        setInputName(response.user?.first_name || "");
-        setInputEmail(response.user?.email || "");
-        setInputPhone(response.user?.phone || "");
-        setInputAddress(response.user?.address || "");
-        setInputBio(response.user?.bio || "Eco-conscious CleanBee member.");
+        // Fill the profile form with backend data
+      // Fill the profile form with backend data
+setInputName(response.user?.first_name || "");
+setInputEmail(response.user?.email || "");
+setInputPhone(response.user?.phone || "");
+setInputAddress(response.user?.address || "");
+setInputBio(
+  response.user?.bio || "Eco-conscious CleanBee member."
+);
 
-        setPhone(response.user?.phone || "");
-        setAddress(response.user?.address || "");
-        setBio(response.user?.bio || "Eco-conscious CleanBee member.");
+setPhone(response.user?.phone || "");
+setAddress(response.user?.address || "");
+setBio(
+  response.user?.bio || "Eco-conscious CleanBee member."
+);
       } catch (error) {
         console.error("Failed to load user:", error);
         setProfileError(error.message || "Could not load your profile.");
@@ -147,10 +161,13 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
 
   const formatMemberSince = (date) => {
     if (!date) return "Unknown";
+
     const parsedDate = new Date(date);
+
     if (Number.isNaN(parsedDate.getTime())) {
       return "Unknown";
     }
+
     return parsedDate.toLocaleDateString("en-US", {
       month: "long",
       year: "numeric",
@@ -161,21 +178,22 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
 
   const handleRequestPickup = (e) => {
     e.preventDefault();
-    const nextId = 101;
 
-    setStats({
-      total: 1,
-      completed: 0,
-      pending: 1,
-      points: 10,
-    });
+    const nextId = Math.max(...activities.map((a) => a.id), 100) + 1;
 
-    setActivities([
+    setStats((prev) => ({
+      ...prev,
+      total: prev.total + 1,
+      pending: prev.pending + 1,
+    }));
+
+    setActivities((prev) => [
       {
         id: nextId,
         status: "Pending",
         text: `Request #${nextId} Pending (${wasteType})`,
       },
+      ...prev,
     ]);
 
     setShowModal(null);
@@ -197,66 +215,70 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
     }
 
     setErrors(errs);
+
     return Object.keys(errs).length === 0;
   };
 
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
+ const handleSaveProfile = async (e) => {
+  e.preventDefault();
 
-    if (!validateProfile()) {
-      return;
-    }
+  if (!validateProfile()) {
+    return;
+  }
 
-    try {
-      setProfileLoading(true);
-      setProfileError("");
+  try {
+    setProfileLoading(true);
+    setProfileError("");
 
-      const response = await authApi.updateProfile({
-        first_name: inputName.trim(),
-        email: inputEmail.trim().toLowerCase(),
-        phone: inputPhone.trim(),
-        address: inputAddress.trim(),
-        bio: inputBio.trim(),
-      });
+    const response = await authApi.updateProfile({
+      first_name: inputName.trim(),
+      email: inputEmail.trim().toLowerCase(),
+      phone: inputPhone.trim(),
+      address: inputAddress.trim(),
+      bio: inputBio.trim(),
+    });
 
-      const updatedUser = response.user;
-      onUserUpdated?.(updatedUser);
-      setUser(updatedUser);
+    const updatedUser = response.user;
+    onUserUpdated?.(updatedUser);
 
-      setInputName(updatedUser.first_name || "");
-      setInputEmail(updatedUser.email || "");
-      setInputPhone(updatedUser.phone || "");
-      setInputAddress(updatedUser.address || "");
-      setInputBio(updatedUser.bio || "");
+    setUser(updatedUser);
 
-      setPhone(updatedUser.phone || "");
-      setAddress(updatedUser.address || "");
-      setBio(updatedUser.bio || "");
+    setInputName(updatedUser.first_name || "");
+    setInputEmail(updatedUser.email || "");
+    setInputPhone(updatedUser.phone || "");
+    setInputAddress(updatedUser.address || "");
+    setInputBio(updatedUser.bio || "");
 
-      localStorage.setItem("firstName", updatedUser.first_name || "");
-      localStorage.setItem("email", updatedUser.email || "");
-      localStorage.setItem("phone", updatedUser.phone || "");
-      localStorage.setItem("address", updatedUser.address || "");
-      localStorage.setItem("bio", updatedUser.bio || "");
+    setPhone(updatedUser.phone || "");
+    setAddress(updatedUser.address || "");
+    setBio(updatedUser.bio || "");
 
-      setShowModal(null);
-      setToast("Profile updated successfully.");
+    localStorage.setItem("firstName", updatedUser.first_name || "");
+    localStorage.setItem("email", updatedUser.email || "");
+    localStorage.setItem("phone", updatedUser.phone || "");
+    localStorage.setItem("address", updatedUser.address || "");
+    localStorage.setItem("bio", updatedUser.bio || "");
 
-      setTimeout(() => {
-        setToast("");
-      }, 4000);
-    } catch (error) {
-      console.error("Failed to update profile:", error);
-      setProfileError(error.message || "Failed to update profile.");
-      setToast(error.message || "Failed to update profile.");
+    setShowModal(null);
 
-      setTimeout(() => {
-        setToast("");
-      }, 4000);
-    } finally {
-      setProfileLoading(false);
-    }
-  };
+    setToast("Profile updated successfully.");
+
+    setTimeout(() => {
+      setToast("");
+    }, 4000);
+  } catch (error) {
+    console.error("Failed to update profile:", error);
+
+    setProfileError(error.message || "Failed to update profile.");
+    setToast(error.message || "Failed to update profile.");
+
+    setTimeout(() => {
+      setToast("");
+    }, 4000);
+  } finally {
+    setProfileLoading(false);
+  }
+};
 
   const handleCancelProfile = () => {
     setInputName(firstName);
@@ -321,11 +343,11 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
         </h1>
 
         <nav className="db-nav">
-          <button className="nav-btn" onClick={() => navigate("/")}>
-            Home
-          </button>
-
           <button className="nav-btn active">Dashboard</button>
+
+          <button className="nav-btn" onClick={() => navigate("/pickup-requests")}>
+            Pickup Requests
+          </button>
 
           {["volunteer", "admin"].includes(userRole) && (
             <button className="nav-btn" onClick={() => navigate("/volunteer/tasks")}>
@@ -353,7 +375,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
           aria-label="Notifications"
         >
           <BellIcon />
-          <span className="bell-badge">1</span>
+          <span className="bell-badge">3</span>
         </button>
       </header>
 
@@ -405,8 +427,14 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
               <h3>Quick Actions</h3>
 
               <div className="action-buttons">
-                <button onClick={() => navigate("/pickup-requests")}>
-                  My Pickup Request
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("activities")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                >
+                  View History
                 </button>
 
                 <button onClick={() => setShowModal("guide")}>
@@ -492,6 +520,25 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
                 <EditIcon /> Edit Profile
               </button>
             </section>
+
+            <section className="db-card alerts-panel">
+              <h3>System Alerts</h3>
+
+              <div className="alert-item">
+                <span>✓</span>
+                <p>Pickup request approved</p>
+              </div>
+
+              <div className="alert-item">
+                <span>🚚</span>
+                <p>Collector assigned</p>
+              </div>
+
+              <div className="alert-item">
+                <span>★</span>
+                <p>Earned 20 Eco Points</p>
+              </div>
+            </section>
           </div>
         </div>
       </main>
@@ -501,6 +548,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
         <p>Terms of Service &bull; Privacy Policy</p>
       </footer>
 
+      {/* Pickup Modal */}
       {showModal === "pickup" && (
         <div
           className="modal-overlay"
@@ -544,6 +592,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
         </div>
       )}
 
+      {/* Profile Modal */}
       {showModal === "profile" && (
         <div
           className="modal-overlay"
@@ -646,6 +695,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
         </div>
       )}
 
+      {/* Guide Modal */}
       {showModal === "guide" && (
         <div
           className="modal-overlay"
@@ -693,6 +743,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
         </div>
       )}
 
+      {/* Notifications */}
       {showModal === "bell" && (
         <div className="bell-dropdown">
           <div className="bell-header">
@@ -704,7 +755,15 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
           </div>
 
           <div className="bell-item">
-            Pickup request created successfully
+            Pickup request approved
+          </div>
+
+          <div className="bell-item">
+            Collector assigned
+          </div>
+
+          <div className="bell-item">
+            Earned 20 Eco Points
           </div>
         </div>
       )}
