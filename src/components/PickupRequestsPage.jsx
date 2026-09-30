@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { cancelPickup, getMyPickups } from "../services/pickupService";
+import PickupRequestForm from "./PickupRequestForm";
 import PickupRequestList from "./PickupRequestList";
 import PickupDetailsModal from "./PickupDetailsModal";
 import CancelPickupModal from "./CancelPickupModal";
@@ -12,14 +13,23 @@ const ArrowLeftIcon = () => (
   </svg>
 );
 
+const PlusIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <line x1="12" y1="5" x2="12" y2="19" />
+    <line x1="5" y1="12" x2="19" y2="12" />
+  </svg>
+);
+
 export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState("list"); // 'list' | 'create'
   const [pickups, setPickups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [toastMessage, setToastMessage] = useState("");
 
+  // Modals state
   const [selectedPickup, setSelectedPickup] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [pickupToCancel, setPickupToCancel] = useState(null);
@@ -69,6 +79,7 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
     };
   }, []);
 
+  // Handlers
   const handleOpenDetails = (pickup) => {
     setSelectedPickup(pickup);
     setIsDetailsOpen(true);
@@ -93,14 +104,22 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
     }
   };
 
+  const handleCreateSuccess = () => {
+    showToast("Your pickup request was scheduled successfully!");
+    setActiveTab("list");
+    fetchPickups();
+  };
+
   return (
     <div className="prp-page">
+      {/* Toast Notification */}
       {toastMessage && (
         <div className="prp-toast">
           <span>✓</span> {toastMessage}
         </div>
       )}
 
+      {/* Top Header */}
       <header className="prp-header">
         <div className="prp-header-inner">
           <div className="prp-nav-left">
@@ -141,6 +160,7 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
         </div>
       </header>
 
+      {/* Hero Banner */}
       <section className="prp-hero">
         <div className="prp-hero-content">
           <span className="prp-hero-badge">Doorstep Collection</span>
@@ -149,24 +169,52 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
             Schedule recyclable waste pickups from your home or business, track collection status in real-time,
             and earn CleanBee Eco Points.
           </p>
+
+          <div className="prp-mode-toggle">
+            <button
+              type="button"
+              className={`prp-toggle-btn ${activeTab === "list" ? "active" : ""}`}
+              onClick={() => setActiveTab("list")}
+            >
+              My Requests ({pickups.length})
+            </button>
+            <button
+              type="button"
+              className={`prp-toggle-btn ${activeTab === "create" ? "active" : ""}`}
+              onClick={() => setActiveTab("create")}
+            >
+              <PlusIcon /> Schedule New Pickup
+            </button>
+          </div>
         </div>
       </section>
 
+      {/* Main Container */}
       <main className="prp-main">
         <div className="prp-container">
-          <div className="prp-list-wrapper">
-            <PickupRequestList
-              pickups={pickups}
-              loading={loading}
-              error={error}
-              onViewDetails={handleOpenDetails}
-              onCancel={handleOpenCancel}
-              onRefresh={fetchPickups}
-            />
-          </div>
+          {activeTab === "create" ? (
+            <div className="prp-form-wrapper">
+              <PickupRequestForm
+                onSuccess={handleCreateSuccess}
+                onCancel={() => setActiveTab("list")}
+              />
+            </div>
+          ) : (
+            <div className="prp-list-wrapper">
+              <PickupRequestList
+                pickups={pickups}
+                loading={loading}
+                error={error}
+                onViewDetails={handleOpenDetails}
+                onCancel={handleOpenCancel}
+                onRefresh={fetchPickups}
+              />
+            </div>
+          )}
         </div>
       </main>
 
+      {/* Modals */}
       <PickupDetailsModal
         pickup={selectedPickup}
         isOpen={isDetailsOpen}
