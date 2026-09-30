@@ -248,54 +248,36 @@ function App() {
       {/* Backward Compatibility for /parent */}
       <Route path="/parent" element={<Navigate to="/" replace />} />
 
-      {/* Photo Verification */}
+      {/* Photo Verification — accessible to guests and logged-in users */}
       <Route
         path="/photo-verification"
         element={
-          isLoggedIn && hasVerifiedAccess ? (
-            <PhotoVerification
-              isLoggedIn={isLoggedIn}
-              onLogout={handleLogout}
-            />
-          ) : isLoggedIn ? (
-            <Navigate to="/verify-email" replace />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <PhotoVerification
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
         }
       />
 
-      {/* Area Reports */}
+      {/* Area Reports — accessible to guests and logged-in users */}
       <Route
         path="/area-reports"
         element={
-          isLoggedIn && hasVerifiedAccess ? (
-            <AreaReports
-              isLoggedIn={isLoggedIn}
-              onLogout={handleLogout}
-            />
-          ) : isLoggedIn ? (
-            <Navigate to="/verify-email" replace />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <AreaReports
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
         }
       />
 
-      {/* Notifications / Instant Alerts */}
+      {/* Notifications / Instant Alerts — accessible to guests and logged-in users */}
       <Route
         path="/notifications"
         element={
-          isLoggedIn && hasVerifiedAccess ? (
-            <Notifications
-              isLoggedIn={isLoggedIn}
-              onLogout={handleLogout}
-            />
-          ) : isLoggedIn ? (
-            <Navigate to="/verify-email" replace />
-          ) : (
-            <Navigate to="/" replace />
-          )
+          <Notifications
+            isLoggedIn={isLoggedIn}
+            onLogout={handleLogout}
+          />
         }
       />
 
