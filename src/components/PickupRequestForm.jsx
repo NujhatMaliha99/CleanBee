@@ -105,7 +105,7 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
 
     try {
       const response = await createPickup({
-        waste_type: WASTE_CATEGORIES.find((category) => category.value === wasteType)?.label,
+        waste_type: wasteType,
         quantity: Number(quantity),
         quantity_unit: quantityUnit,
         pickup_address: pickupAddress.trim(),
@@ -114,7 +114,6 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
         contact_phone: contactPhone.trim(),
         instructions: instructions.trim(),
         image: photo?.file || null,
-        previewUrl: photo?.preview || null,
       });
       setSubmitSuccess(true);
 

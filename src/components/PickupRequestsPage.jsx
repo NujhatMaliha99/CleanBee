@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { cancelPickup, getMyPickups } from "../services/pickupService";
+import { cancelPickup, getMyPickups, getPickupDetails } from "../services/pickupService";
 import PickupRequestList from "./PickupRequestList";
 import PickupDetailsModal from "./PickupDetailsModal";
 import CancelPickupModal from "./CancelPickupModal";
@@ -81,9 +81,15 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
     };
   }, []);
 
-  const handleOpenDetails = (pickup) => {
-    setSelectedPickup(pickup);
-    setIsDetailsOpen(true);
+  const handleOpenDetails = async (pickup) => {
+    try {
+      const pickupDetails = await getPickupDetails(pickup.id);
+      setSelectedPickup(pickupDetails);
+      setIsDetailsOpen(true);
+    } catch (err) {
+      console.error("Failed to load pickup details:", err);
+      showToast(err.message || "Failed to load pickup details.");
+    }
   };
 
   const handleOpenCancel = (pickup) => {

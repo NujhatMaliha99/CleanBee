@@ -64,10 +64,12 @@ export const authApi = {
 export const pickupApi = {
   getAll: () => request("/pickups"),
 
+  getOne: (pickupId) => request(`/pickups/${pickupId}`),
+
   create: (details) =>
     request("/pickups", {
       method: "POST",
-      body: JSON.stringify(details),
+      body: details instanceof FormData ? details : JSON.stringify(details),
     }),
 
   uploadPhoto: (pickupId, photo, photoType = "before") => {
