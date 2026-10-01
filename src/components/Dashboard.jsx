@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-import { authApi, dashboardApi, volunteerApi } from "../services/api";
+import { authApi, dashboardApi, notificationsApi, volunteerApi } from "../services/api";
 import PickupRequestForm from "./PickupRequestForm";
 import RewardsPanel from "./RewardsPanel";
 
@@ -85,6 +85,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
   const [volunteerSwitching, setVolunteerSwitching] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const [phone, setPhone] = useState(() => localStorage.getItem("phone") || "");
   const [address, setAddress] = useState(() => localStorage.getItem("address") || "");
@@ -163,6 +164,12 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
   };
 
   useEffect(() => { Promise.resolve().then(refreshDashboard); }, []);
+
+  useEffect(() => {
+    notificationsApi.getAll()
+      .then((response) => setUnreadNotifications(response.unread_count || 0))
+      .catch((error) => console.error("Failed to load notification count:", error));
+  }, []);
 
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
@@ -378,13 +385,15 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
 
         <button
           className="db-bell"
-          onClick={() =>
-            setShowModal(showModal === "bell" ? null : "bell")
-          }
+          onClick={() => navigate("/notifications")}
           aria-label="Notifications"
         >
           <BellIcon />
-          <span className="bell-badge">1</span>
+          {unreadNotifications > 0 && (
+            <span className="bell-badge" aria-label={`${unreadNotifications} unread notifications`}>
+              {unreadNotifications > 99 ? "99+" : unreadNotifications}
+            </span>
+          )}
         </button>
       </header>
 

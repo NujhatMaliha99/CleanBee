@@ -146,6 +146,12 @@ export const dashboardApi = {
   getSummary: () => request("/dashboard"),
 };
 
+export const notificationsApi = {
+  getAll: () => request("/notifications"),
+  markAsRead: (notificationId) => request(`/notifications/${notificationId}/read`, { method: "PATCH" }),
+  markAllAsRead: () => request("/notifications/read", { method: "PATCH" }),
+};
+
 export const rewardApi = {
   getAll: () => request("/rewards"),
   getHistory: () => request("/reward-redemptions"),
