@@ -89,3 +89,19 @@
 .vol-retry-btn:hover {
   background: #08613a;
 }
+
+.volunteer-task-grid {
+  grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+  gap: 18px;
+}
+
+.vol-list-state {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(31, 107, 69, 0.22);
+}
+
+@media (max-width: 560px) {
+  .volunteer-task-grid {
+    grid-template-columns: 1fr;
+  }
+}

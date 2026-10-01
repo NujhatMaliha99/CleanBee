@@ -203,3 +203,47 @@
   color: #64748b;
   max-width: 320px;
 }
+
+.pickup-tabs-wrapper {
+  padding: 3px;
+  gap: 6px;
+}
+
+.pickup-tab-btn {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(31, 107, 69, 0.12);
+  color: #4c6b5b;
+  padding: 9px 15px;
+}
+
+.pickup-tab-btn:hover {
+  background: #fff;
+  border-color: rgba(31, 107, 69, 0.22);
+  color: #123a26;
+}
+
+.pickup-tab-btn.active {
+  background: linear-gradient(135deg, #1f6b45 0%, #2f875d 100%);
+  border-color: #1f6b45;
+  box-shadow: 0 7px 16px rgba(31, 107, 69, 0.2);
+}
+
+.pickup-grid {
+  grid-template-columns: repeat(auto-fill, minmax(295px, 1fr));
+  gap: 18px;
+}
+
+.pickup-list-state {
+  background: rgba(255, 255, 255, 0.56);
+  border-color: rgba(31, 107, 69, 0.22);
+}
+
+@media (max-width: 560px) {
+  .pickup-tab-btn {
+    padding: 8px 12px;
+  }
+
+  .pickup-grid {
+    grid-template-columns: 1fr;
+  }
+}

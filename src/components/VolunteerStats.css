@@ -95,3 +95,62 @@
 .vol-stat-card--points .vol-stat-label {
   color: #d1fae5;
 }
+
+.volunteer-stats-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.vol-stat-card {
+  min-width: 0;
+  padding: 17px;
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 12px 28px rgba(18, 58, 38, 0.09);
+  backdrop-filter: blur(14px);
+}
+
+.vol-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(18, 58, 38, 0.13);
+}
+
+.vol-stat-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+}
+
+.vol-stat-number {
+  color: #123a26;
+}
+
+.vol-stat-label {
+  color: #4c6b5b;
+}
+
+.vol-stat-card--points {
+  background: linear-gradient(135deg, #123a26 0%, #1f6b45 100%);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+@media (max-width: 1050px) {
+  .volunteer-stats-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .volunteer-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .vol-stat-card {
+    padding: 13px;
+  }
+
+  .vol-stat-card--points {
+    grid-column: 1 / -1;
+  }
+}
