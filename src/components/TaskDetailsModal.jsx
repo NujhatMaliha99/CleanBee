@@ -3,6 +3,7 @@ import TaskActivityTimeline from "./TaskActivityTimeline";
 import "./TaskDetailsModal.css";
 
 const API_BASE_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/, "");
+const APP_BASE_URL = API_BASE_URL.replace(/\/api$/, "");
 
 export default function TaskDetailsModal({
   task,
@@ -30,7 +31,7 @@ export default function TaskDetailsModal({
     if (!path) return null;
     if (path.startsWith("blob:") || path.startsWith("http") || path.startsWith("data:")) return path;
     const cleanPath = path.replace(/^public\//, "");
-    return `${API_BASE_URL}/storage/${cleanPath}`;
+    return `${APP_BASE_URL}/storage/${cleanPath}`;
   };
 
   const imageUrl = getImageUrl(task.image_path || task.previewUrl || task.image);

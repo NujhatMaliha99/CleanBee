@@ -5,6 +5,7 @@ import {
   completeTask,
   getAvailableTasks,
   getMyTasks,
+  getTaskDetails,
   startTask,
 } from "../services/volunteerService";
 import VolunteerStats from "./VolunteerStats";
@@ -204,9 +205,15 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
   }, [myTasks, myTasksTab, filterAndSort]);
 
   // Modal Handlers
-  const handleOpenDetails = (task) => {
-    setSelectedTask(task);
-    setIsDetailsOpen(true);
+  const handleOpenDetails = async (task) => {
+    try {
+      const taskDetails = await getTaskDetails(task.id);
+      setSelectedTask(taskDetails);
+      setIsDetailsOpen(true);
+    } catch (err) {
+      console.error("Failed to load task details:", err);
+      showToast(err.message || "Failed to load task details.");
+    }
   };
 
   const handleOpenClaimModal = (task) => {

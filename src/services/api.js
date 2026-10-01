@@ -94,6 +94,8 @@ export const volunteerApi = {
 
   getMyTasks: () => request("/volunteer/my-tasks"),
 
+  getOne: (pickupId) => request(`/volunteer/tasks/${pickupId}`),
+
   claimTask: (pickupId) =>
     request(`/volunteer/tasks/${pickupId}/claim`, {
       method: "POST",
