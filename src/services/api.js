@@ -141,3 +141,8 @@ export const landingApi = {
 
   getWallet: () => request("/landing/wallet"),
 };
+export const notificationsApi = {
+  getAll: () => request("/notifications"),
+  markAsRead: (notificationId) => request(`/notifications/${notificationId}/read`, { method: "PATCH" }),
+  markAllAsRead: () => request("/notifications/read", { method: "PATCH" }),
+};

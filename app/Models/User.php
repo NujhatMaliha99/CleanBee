@@ -66,4 +66,8 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(PickupRequest::class, 'assigned_volunteer_id');
     }
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

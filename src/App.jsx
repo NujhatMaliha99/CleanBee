@@ -303,12 +303,16 @@ function App() {
       {/* Notifications / Instant Alerts — accessible to guests and logged-in users */}
       <Route
         path="/notifications"
-        element={
+        element={isLoggedIn && hasVerifiedAccess ? (
           <Notifications
             isLoggedIn={isLoggedIn}
             onLogout={handleLogout}
           />
-        }
+        ) : isLoggedIn ? (
+          <Navigate to="/verify-email" replace />
+        ) : (
+          <Navigate to="/login" replace />
+        )}
       />
 
       {/* Fallback Route - matched na hole landing-e pathabe */}

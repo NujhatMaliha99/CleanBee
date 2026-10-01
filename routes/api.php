@@ -8,6 +8,7 @@ use App\Http\Controllers\PickupRequestController;
 use App\Http\Controllers\PickupPhotoController;
 use App\Http\Controllers\VolunteerTaskController;
 use App\Http\Controllers\VolunteerProfileController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,6 +33,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::get('/landing/wallet', [LandingController::class, 'wallet']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/read', [NotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     Route::put('/volunteer/mode', [VolunteerProfileController::class, 'updateMode']);
     Route::put('/volunteer/availability', [VolunteerProfileController::class, 'updateAvailability']);
 

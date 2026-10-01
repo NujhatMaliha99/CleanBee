@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-import { authApi, volunteerApi } from "../services/api";
+import { authApi, notificationsApi, volunteerApi } from "../services/api";
 
 const BellIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon">
@@ -83,6 +83,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
   const [volunteerSwitching, setVolunteerSwitching] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const [phone, setPhone] = useState(() => localStorage.getItem("phone") || "");
   const [address, setAddress] = useState(() => localStorage.getItem("address") || "");
@@ -142,6 +143,11 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
     loadUser();
   }, []);
 
+  useEffect(() => {
+    notificationsApi.getAll()
+      .then((response) => setUnreadNotifications(response.unread_count || 0))
+      .catch((error) => console.error("Failed to load notification count:", error));
+  }, []);
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
   const email = user?.email || "";
@@ -373,13 +379,15 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
 
         <button
           className="db-bell"
-          onClick={() =>
-            setShowModal(showModal === "bell" ? null : "bell")
-          }
+          onClick={() => navigate("/notifications")}
           aria-label="Notifications"
         >
           <BellIcon />
-          <span className="bell-badge">1</span>
+          {unreadNotifications > 0 && (
+            <span className="bell-badge" aria-label={`${unreadNotifications} unread notifications`}>
+              {unreadNotifications > 99 ? "99+" : unreadNotifications}
+            </span>
+          )}
         </button>
       </header>
 
