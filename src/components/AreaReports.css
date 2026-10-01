@@ -523,3 +523,131 @@
     grid-template-columns: 1fr;
   }
 }
+
+.ar-page-head--actions,
+.ar-section-title,
+.ar-report-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ar-toast {
+  background: #1f6b45;
+  color: #fff;
+  padding: 12px min(5%, 40px);
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(31, 107, 69, 0.2);
+}
+
+.ar-error {
+  margin-bottom: 18px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fff1f0;
+  color: #b42318;
+  border: 1px solid #fecdca;
+}
+
+.ar-section-title {
+  margin-bottom: 16px;
+}
+
+.ar-section-title h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.ar-state {
+  background: #fff;
+  border: 1px dashed rgba(31, 107, 69, 0.25);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.ar-report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ar-report-card {
+  background: #fff;
+  border: 1px solid rgba(31, 107, 69, 0.1);
+  border-radius: 16px;
+  padding: 18px 22px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.ar-report-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ar-report-type,
+.ar-report-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(31, 107, 69, 0.1);
+  color: var(--forest-soft);
+}
+
+.ar-report-status--pending {
+  background: rgba(245, 158, 11, 0.15);
+  color: #b45309;
+}
+
+.ar-report-status--resolved {
+  background: rgba(46, 139, 87, 0.15);
+}
+
+.ar-report-card p {
+  margin: 10px 0;
+  color: var(--ink-soft);
+}
+
+.ar-report-address,
+.ar-report-time {
+  display: block;
+  font-size: 12px;
+  color: #6b7d72;
+  margin-top: 4px;
+}
+
+.ar-modal-copy {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+}
+
+.ar-report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ar-coordinate-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 520px) {
+  .ar-page-head--actions,
+  .ar-section-title,
+  .ar-report-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ar-coordinate-row {
+    grid-template-columns: 1fr;
+  }
+}
