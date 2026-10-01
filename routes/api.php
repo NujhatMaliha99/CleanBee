@@ -8,6 +8,9 @@ use App\Http\Controllers\PickupRequestController;
 use App\Http\Controllers\PickupPhotoController;
 use App\Http\Controllers\VolunteerTaskController;
 use App\Http\Controllers\VolunteerProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\RewardRedemptionController;
+use App\Http\Controllers\AdminReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -32,6 +35,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::get('/landing/wallet', [LandingController::class, 'wallet']);
+    Route::get('/dashboard', [DashboardController::class, 'show']);
+    Route::get('/rewards', [RewardRedemptionController::class, 'index']);
+    Route::get('/reward-redemptions', [RewardRedemptionController::class, 'history']);
+    Route::post('/rewards/{reward}/redeem', [RewardRedemptionController::class, 'redeem']);
     Route::put('/volunteer/mode', [VolunteerProfileController::class, 'updateMode']);
     Route::put('/volunteer/availability', [VolunteerProfileController::class, 'updateAvailability']);
 
@@ -75,6 +82,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin
     Route::middleware(RoleMiddleware::class . ':admin')->group(function () {
+
+        Route::get('/admin/reviews', [AdminReviewController::class, 'index']);
+        Route::post('/admin/reviews/{type}/{id}/approve', [AdminReviewController::class, 'approve']);
+        Route::post('/admin/reviews/{type}/{id}/reject', [AdminReviewController::class, 'reject']);
 
         Route::get('/admin/reports', function () {
             return response()->json([

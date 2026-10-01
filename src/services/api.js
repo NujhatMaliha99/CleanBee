@@ -141,3 +141,16 @@ export const landingApi = {
 
   getWallet: () => request("/landing/wallet"),
 };
+
+export const dashboardApi = {
+  getSummary: () => request("/dashboard"),
+};
+
+export const rewardApi = {
+  getAll: () => request("/rewards"),
+  getHistory: () => request("/reward-redemptions"),
+  redeem: (rewardId, idempotencyKey) => request(`/rewards/${rewardId}/redeem`, {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+  }),
+};

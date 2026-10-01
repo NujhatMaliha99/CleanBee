@@ -245,7 +245,7 @@ export default function VolunteerDashboard({
 
       if (confirmActionType === "claim") {
         await claimTask(taskId);
-        showToast(`Task #${taskId} claimed successfully! Moved to My Tasks.`);
+        showToast(`Task #${taskId} claim submitted for admin approval.`);
       } else if (confirmActionType === "start") {
         await startTask(taskId);
         showToast(`Pickup #${taskId} started! Status updated to In Progress.`);

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-import { authApi, volunteerApi } from "../services/api";
+import { authApi, dashboardApi, volunteerApi } from "../services/api";
+import PickupRequestForm from "./PickupRequestForm";
+import RewardsPanel from "./RewardsPanel";
 
 const BellIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon">
@@ -93,22 +95,22 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
   const [showModal, setShowModal] = useState(null);
 
   const [stats, setStats] = useState({
-    total: 1,
+    total: 0,
     completed: 0,
-    pending: 1,
-    points: 10,
+    pending: 0,
+    accepted: 0,
+    in_progress: 0,
+    points: 0,
   });
-
-  const [activities, setActivities] = useState([
-    { id: 101, status: "Pending", text: "Request #101 Pending (Plastic)" },
-  ]);
+  const [activities, setActivities] = useState([]);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
 
   const [inputName, setInputName] = useState("");
   const [inputEmail, setInputEmail] = useState("");
   const [inputPhone, setInputPhone] = useState(phone);
   const [inputAddress, setInputAddress] = useState(address);
   const [inputBio, setInputBio] = useState(bio);
-  const [wasteType, setWasteType] = useState("Plastic");
 
   const [errors, setErrors] = useState({});
   const [toast, setToast] = useState("");
@@ -142,6 +144,26 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
     loadUser();
   }, []);
 
+  const refreshDashboard = async () => {
+    try {
+      const response = await dashboardApi.getSummary();
+      const summary = response.data;
+      setDashboardError("");
+      setStats(summary.stats);
+      setActivities((summary.activities || []).map((pickup) => ({
+        id: pickup.id,
+        status: pickup.status.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()),
+        text: `Pickup #${pickup.id} · ${pickup.waste_type}`,
+      })));
+    } catch (error) {
+      setDashboardError(error.message || "Could not load dashboard information.");
+    } finally {
+      setDashboardLoading(false);
+    }
+  };
+
+  useEffect(() => { Promise.resolve().then(refreshDashboard); }, []);
+
   const firstName = user?.first_name || "";
   const lastName = user?.last_name || "";
   const email = user?.email || "";
@@ -160,26 +182,9 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
 
   const fullName = [firstName, lastName].filter(Boolean).join(" ");
 
-  const handleRequestPickup = (e) => {
-    e.preventDefault();
-    const nextId = 101;
-
-    setStats({
-      total: 1,
-      completed: 0,
-      pending: 1,
-      points: 10,
-    });
-
-    setActivities([
-      {
-        id: nextId,
-        status: "Pending",
-        text: `Request #${nextId} Pending (${wasteType})`,
-      },
-    ]);
-
+  const handlePickupSuccess = async () => {
     setShowModal(null);
+    await refreshDashboard();
   };
 
   const validateProfile = () => {
@@ -395,7 +400,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
           <div className="stat-card">
             <TrashIcon />
             <div className="stat-txt">
-              <h3>{stats.total}</h3>
+              <h3>{dashboardLoading ? "—" : stats.total}</h3>
               <p>Total Requests</p>
             </div>
           </div>
@@ -403,7 +408,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
           <div className="stat-card">
             <TruckIcon />
             <div className="stat-txt">
-              <h3>{stats.completed}</h3>
+              <h3>{dashboardLoading ? "—" : stats.completed}</h3>
               <p>Completed Pickups</p>
             </div>
           </div>
@@ -411,15 +416,31 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
           <div className="stat-card">
             <ClockIcon />
             <div className="stat-txt">
-              <h3>{stats.pending}</h3>
+              <h3>{dashboardLoading ? "—" : stats.pending}</h3>
               <p>Pending Requests</p>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <ClockIcon />
+            <div className="stat-txt">
+              <h3>{dashboardLoading ? "—" : stats.accepted}</h3>
+              <p>Accepted Pickups</p>
+            </div>
+          </div>
+
+          <div className="stat-card">
+            <TruckIcon />
+            <div className="stat-txt">
+              <h3>{dashboardLoading ? "—" : stats.in_progress}</h3>
+              <p>In Progress</p>
             </div>
           </div>
 
           <div className="stat-card eco">
             <LeafIcon />
             <div className="stat-txt">
-              <h3>{stats.points}</h3>
+              <h3>{dashboardLoading ? "—" : stats.points}</h3>
               <p>Eco Points</p>
             </div>
           </div>
@@ -431,6 +452,7 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
               <h3>Quick Actions</h3>
 
               <div className="action-buttons">
+                <button onClick={() => setShowModal("pickup")}>Schedule Pickup</button>
                 <button onClick={() => navigate("/pickup-requests")}>
                   My Pickup Request
                 </button>
@@ -443,6 +465,10 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
 
             <section id="activities" className="db-card">
               <h3>Recent Activities</h3>
+
+              {dashboardError && <p role="alert">{dashboardError} <button onClick={refreshDashboard}>Retry</button></p>}
+              {dashboardLoading && <p role="status">Loading recent pickups…</p>}
+              {!dashboardLoading && !dashboardError && activities.length === 0 && <p>No pickup activity yet.</p>}
 
               <div className="activity-list">
                 {activities.map((act) => (
@@ -466,6 +492,8 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
                 ))}
               </div>
             </section>
+
+            <RewardsPanel onBalanceChange={(points) => setStats((current) => ({ ...current, points }))} />
           </div>
 
           <div className="db-right">
@@ -532,41 +560,9 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
           className="modal-overlay"
           onClick={() => setShowModal(null)}
         >
-          <form
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-            onSubmit={handleRequestPickup}
-          >
-            <h3>Request waste pickup</h3>
-
-            <div className="form-item">
-              <label htmlFor="waste-select">Waste Category</label>
-
-              <select
-                id="waste-select"
-                value={wasteType}
-                onChange={(e) => setWasteType(e.target.value)}
-              >
-                <option value="Plastic">Plastic & Bottles</option>
-                <option value="Organic">Organic & Food Waste</option>
-                <option value="Paper">Paper & Cardboard</option>
-                <option value="E-Waste">Electronics</option>
-              </select>
-            </div>
-
-            <div className="modal-btns">
-              <button
-                type="button"
-                onClick={() => setShowModal(null)}
-              >
-                Cancel
-              </button>
-
-              <button type="submit" className="primary">
-                Schedule
-              </button>
-            </div>
-          </form>
+          <div className="dashboard-pickup-modal" onClick={(e) => e.stopPropagation()}>
+            <PickupRequestForm onCancel={() => setShowModal(null)} onSuccess={handlePickupSuccess} />
+          </div>
         </div>
       )}
 
