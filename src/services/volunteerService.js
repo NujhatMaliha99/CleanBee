@@ -2,6 +2,16 @@ import { volunteerApi } from "./api";
 
 const unwrapData = (response) => response?.data ?? response;
 
+export const updateVolunteerMode = async (enabled) => {
+  const response = await volunteerApi.updateMode(enabled);
+  return response.user;
+};
+
+export const updateVolunteerAvailability = async (availability) => {
+  const response = await volunteerApi.updateAvailability(availability);
+  return response.user;
+};
+
 export const getAvailableTasks = async () => {
   const response = await volunteerApi.getAvailableTasks();
   return unwrapData(response) || [];

@@ -12,7 +12,14 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        if (!$user || !in_array($user->role, $roles, true)) {
+        $hasRequiredRole = $user
+            && in_array($user->role, $roles, true)
+            && ($user->role !== 'volunteer' || $user->volunteer_enabled);
+        $hasVolunteerMode = $user
+            && in_array('volunteer', $roles, true)
+            && $user->volunteer_enabled;
+
+        if (!$hasRequiredRole && !$hasVolunteerMode) {
             return response()->json([
                 'message' => 'Forbidden. You do not have permission to access this resource.'
             ], Response::HTTP_FORBIDDEN);

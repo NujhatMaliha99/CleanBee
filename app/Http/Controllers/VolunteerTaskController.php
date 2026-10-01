@@ -46,7 +46,13 @@ class VolunteerTaskController extends Controller
 
     public function claim(Request $request, PickupRequest $pickup): JsonResponse
     {
-        abort_unless($request->user()->role === 'volunteer', Response::HTTP_FORBIDDEN);
+        abort_unless(
+            $request->user()->role === 'admin'
+                || ($request->user()->volunteer_enabled
+                    && $request->user()->volunteer_availability === 'available'),
+            Response::HTTP_FORBIDDEN,
+            'Volunteer mode must be enabled and available before claiming a task.'
+        );
 
         $task = DB::transaction(function () use ($request, $pickup) {
             $task = PickupRequest::query()->lockForUpdate()->findOrFail($pickup->id);

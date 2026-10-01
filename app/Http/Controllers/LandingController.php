@@ -28,7 +28,10 @@ class LandingController extends Controller
                         ->sum('quantity'),
                     'completed_pickups' => (clone $completedPickups)->count(),
                     'total_eco_points' => (int) User::query()->sum('eco_points'),
-                    'active_volunteers' => User::query()->where('role', 'volunteer')->count(),
+                    'active_volunteers' => User::query()
+                        ->where('volunteer_enabled', true)
+                        ->where('volunteer_availability', 'available')
+                        ->count(),
                 ],
                 'activities' => $activities,
                 'rewards' => Reward::query()

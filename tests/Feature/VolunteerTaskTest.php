@@ -122,6 +122,8 @@ class VolunteerTaskTest extends TestCase
             'email' => $email,
             'password' => 'password123',
             'role' => $role,
+            'volunteer_enabled' => $role === 'volunteer',
+            'volunteer_availability' => $role === 'volunteer' ? 'available' : 'unavailable',
         ]);
         $user->markEmailAsVerified();
 

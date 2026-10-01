@@ -28,6 +28,8 @@ class User extends Authenticatable implements MustVerifyEmail
     'password',
     'role',
     'eco_points',
+    'volunteer_enabled',
+    'volunteer_availability',
 ];
 
     /**
@@ -51,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'eco_points' => 'integer',
+            'volunteer_enabled' => 'boolean',
         ];
     }
 

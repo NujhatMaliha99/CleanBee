@@ -23,6 +23,12 @@ function App() {
     () => localStorage.getItem("emailVerified") === "true"
   );
   const [userRole, setUserRole] = useState(() => localStorage.getItem("userRole") || "");
+  const [volunteerEnabled, setVolunteerEnabled] = useState(
+    () => localStorage.getItem("volunteerEnabled") === "true"
+  );
+  const [volunteerAvailability, setVolunteerAvailability] = useState(
+    () => localStorage.getItem("volunteerAvailability") || "unavailable"
+  );
   const [needsInitialLogin, setNeedsInitialLogin] = useState(() => !localStorage.getItem("authToken"));
   const [hasRegistered, setHasRegistered] = useState(
     () => localStorage.getItem("hasRegistered") === "true" || Boolean(localStorage.getItem("email"))
@@ -35,10 +41,14 @@ function App() {
     localStorage.setItem("email", user.email || "");
     localStorage.setItem("emailVerified", user.email_verified_at ? "true" : "false");
     localStorage.setItem("userRole", user.role || "user");
+    localStorage.setItem("volunteerEnabled", user.volunteer_enabled ? "true" : "false");
+    localStorage.setItem("volunteerAvailability", user.volunteer_availability || "unavailable");
     localStorage.setItem("hasRegistered", "true");
     setIsLoggedIn(true);
     setIsEmailVerified(Boolean(user.email_verified_at));
     setUserRole(user.role || "user");
+    setVolunteerEnabled(Boolean(user.volunteer_enabled));
+    setVolunteerAvailability(user.volunteer_availability || "unavailable");
     setNeedsInitialLogin(false);
     setHasRegistered(true);
   }, []);
@@ -50,12 +60,16 @@ function App() {
     authApi.currentUser()
       .then(({ user }) => saveSession({ token, user }))
       .catch(() => {
-      localStorage.removeItem("authToken");
+        localStorage.removeItem("authToken");
         localStorage.removeItem("emailVerified");
         localStorage.removeItem("userRole");
+        localStorage.removeItem("volunteerEnabled");
+        localStorage.removeItem("volunteerAvailability");
         setIsLoggedIn(false);
         setIsEmailVerified(false);
         setUserRole("");
+        setVolunteerEnabled(false);
+        setVolunteerAvailability("unavailable");
         setNeedsInitialLogin(true);
       });
   }, [saveSession]);
@@ -66,8 +80,12 @@ function App() {
     localStorage.setItem("email", user.email || "");
     localStorage.setItem("emailVerified", user.email_verified_at ? "true" : "false");
     localStorage.setItem("userRole", user.role || "user");
+    localStorage.setItem("volunteerEnabled", user.volunteer_enabled ? "true" : "false");
+    localStorage.setItem("volunteerAvailability", user.volunteer_availability || "unavailable");
     setIsEmailVerified(Boolean(user.email_verified_at));
     setUserRole(user.role || "user");
+    setVolunteerEnabled(Boolean(user.volunteer_enabled));
+    setVolunteerAvailability(user.volunteer_availability || "unavailable");
   }, []);
 
   const handleLogin = async ({ email, password }) => {
@@ -94,9 +112,13 @@ function App() {
       localStorage.removeItem("authToken");
       localStorage.removeItem("emailVerified");
       localStorage.removeItem("userRole");
+      localStorage.removeItem("volunteerEnabled");
+      localStorage.removeItem("volunteerAvailability");
       setIsLoggedIn(false);
       setIsEmailVerified(false);
       setUserRole("");
+      setVolunteerEnabled(false);
+      setVolunteerAvailability("unavailable");
       setNeedsInitialLogin(true);
     }
   };
@@ -202,6 +224,7 @@ function App() {
               onLogout={handleLogout}
               onUserUpdated={handleVerified}
               userRole={userRole}
+              volunteerEnabled={volunteerEnabled}
             />
           ) : isLoggedIn ? (
             <Navigate to="/verify-email" replace />
@@ -231,8 +254,13 @@ function App() {
       <Route
         path="/volunteer/tasks"
         element={
-          isLoggedIn && hasVerifiedAccess && ["volunteer", "admin"].includes(userRole) ? (
-            <VolunteerDashboard isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+          isLoggedIn && hasVerifiedAccess && (volunteerEnabled || userRole === "admin") ? (
+            <VolunteerDashboard
+              isLoggedIn={isLoggedIn}
+              onLogout={handleLogout}
+              volunteerAvailability={volunteerAvailability}
+              onUserUpdated={handleVerified}
+            />
           ) : isLoggedIn && !hasVerifiedAccess ? (
             <Navigate to="/verify-email" replace />
           ) : isLoggedIn ? (
