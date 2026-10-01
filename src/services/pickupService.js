@@ -1,44 +1,36 @@
-const MOCK_PICKUPS = [
-  {
-    id: 4127,
-    waste_type: "Plastic",
-    quantity: 4,
-    quantity_unit: "kg",
-    pickup_address: "24 Road 7, Dhanmondi, Dhaka",
-    pickup_date: "2026-09-08",
-    pickup_time: "10:00",
-    contact_phone: "+880 1700-000000",
-    instructions: "Please call when you arrive.",
-    assigned_volunteer: { first_name: "Nadia", last_name: "Rahman" },
-    status: "Pending",
-    created_at: "2026-09-03T09:30:00Z",
-  },
-];
+import { pickupApi } from "./api";
 
-let pickups = [...MOCK_PICKUPS];
-let nextId = 4128;
+const unwrapData = (response) => response?.data ?? response;
 
-const wait = (value) => new Promise((resolve) => setTimeout(() => resolve(value), 450));
+const buildPickupFormData = (details) => {
+  const formData = new FormData();
 
-export const createPickup = async (details) => {
-  const pickup = {
-    ...details,
-    id: nextId++,
-    status: "Pending",
-    created_at: new Date().toISOString(),
-    assigned_volunteer: null,
-  };
-  pickups = [pickup, ...pickups];
-  return wait(pickup);
+  Object.entries(details).forEach(([key, value]) => {
+    if (value !== null && value !== undefined && value !== "") {
+      formData.append(key, value);
+    }
+  });
+
+  return formData;
 };
 
-export const getMyPickups = async () => wait([...pickups]);
+export const createPickup = async (details) => {
+  const payload = details.image ? buildPickupFormData(details) : details;
+  const response = await pickupApi.create(payload);
+  return unwrapData(response);
+};
 
-export const getPickupDetails = async (id) => wait(pickups.find((pickup) => pickup.id === id));
+export const getMyPickups = async () => {
+  const response = await pickupApi.getAll();
+  return unwrapData(response) || [];
+};
+
+export const getPickupDetails = async (id) => {
+  const response = await pickupApi.getOne(id);
+  return unwrapData(response);
+};
 
 export const cancelPickup = async (id) => {
-  pickups = pickups.map((pickup) =>
-    pickup.id === id ? { ...pickup, status: "Cancelled" } : pickup
-  );
-  return wait(pickups.find((pickup) => pickup.id === id));
+  const response = await pickupApi.cancel(id);
+  return unwrapData(response);
 };
