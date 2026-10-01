@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AreaReportController;
+use App\Http\Controllers\LandingController;
 use App\Http\Middleware\RoleMiddleware;
 use App\Http\Controllers\PickupRequestController;
 use App\Http\Controllers\PickupPhotoController;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/landing', [LandingController::class, 'index']);
 
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
@@ -28,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
 
     Route::put('/profile', [AuthController::class, 'updateProfile']);
+    Route::get('/landing/wallet', [LandingController::class, 'wallet']);
 
     Route::get('/pickups', [PickupRequestController::class, 'index']);
     Route::post('/pickups', [PickupRequestController::class, 'store']);

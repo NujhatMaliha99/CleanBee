@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { landingApi } from "../services/api";
 import "./LandingScreen.css";
 
 /* Minimal line-icon set — kept in one place so the visual language stays consistent */
@@ -43,14 +44,6 @@ function Icon({ name, size = 22 }) {
   );
 }
 
-const TICKER = [
-  "Pickup #4127 accepted in Dhanmondi",
-  "Rina just earned 40 eco points",
-  "New volunteer joined in Mirpur",
-  "Pickup #4130 marked complete in Gulshan",
-  "Sabbir redeemed 500 points for a top-up",
-];
-
 const STEPS = [
   {
     n: "01",
@@ -77,62 +70,57 @@ const FEATURES = [
   { id: "pin", icon: "pin", title: "Area reports", body: "Track cleanup activity and pending pickups across your neighborhood." },
 ];
 
-const REWARDS = [
-  { points: "500", perk: "৳100 mobile top-up", icon: "coin" },
-  { points: "1,200", perk: "Reusable eco kit", icon: "gift" },
-  { points: "2,000", perk: "A tree planted in your name", icon: "leaf" },
-];
+const EMPTY_OVERVIEW = {
+  stats: {
+    waste_diverted_kg: 0,
+    completed_pickups: 0,
+    total_eco_points: 0,
+    active_volunteers: 0,
+  },
+  activities: [],
+  rewards: [],
+};
 
-const STATS = [
-  { value: "48,600", label: "kg waste diverted" },
-  { value: "9,800", label: "pickups completed" },
-  { value: "126,000", label: "eco points earned" },
-  { value: "3,200", label: "volunteers onboard" },
-];
+const numberFormat = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 1,
+});
+
+const formatStatus = (status) =>
+  String(status || "updated").replaceAll("_", " ");
 
 export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
-
-  const navigate = useNavigate();
-
-  const handleFeatureClick = (featureId) => {
-    switch (featureId) {
-      case "photo":
-        navigate("/photo-verification");
-        break;
-
-      case "volunteer":
-        // Volunteer Tasks
-        break;
-
-      case "area":
-        navigate("/area-reports");
-        break;
-
-      case "eco":
-        // Eco Points
-        break;
-
-      case "alert":
-        navigate("/notifications");
-        break;
-
-      case "report":
-        // Waste Report
-        break;
-
-      default:
-        break;
-    }
-  };
-
-
   const firstName =
     typeof window !== "undefined" ? localStorage.getItem("firstName") : null;
   const [scrolled, setScrolled] = useState(false);
   const [tickerIndex, setTickerIndex] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [overview, setOverview] = useState(EMPTY_OVERVIEW);
+  const [wallet, setWallet] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
   const cardRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const tickerMessages = overview.activities.length
+    ? overview.activities.map(
+        (activity) =>
+          `Pickup #${activity.id} ${formatStatus(activity.status)} · ${formatStatus(activity.waste_type)}`
+      )
+    : ["No recent pickup activity yet."];
+
+  const impactStats = [
+    { value: numberFormat.format(overview.stats.waste_diverted_kg), label: "kg waste diverted" },
+    { value: numberFormat.format(overview.stats.completed_pickups), label: "pickups completed" },
+    { value: numberFormat.format(overview.stats.total_eco_points), label: "eco points earned" },
+    { value: numberFormat.format(overview.stats.active_volunteers), label: "volunteers onboard" },
+  ];
+
+  const nextRewardTarget = wallet?.next_reward?.points_required || 0;
+  const walletProgress = nextRewardTarget
+    ? Math.min(100, (wallet.points / nextRewardTarget) * 100)
+    : wallet
+      ? 100
+      : 0;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -151,12 +139,43 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
   const closeMenu = () => setMenuOpen(false);
 
   useEffect(() => {
+    let active = true;
+
+    const loadLandingData = async (showLoading = false) => {
+      if (showLoading) setLoading(true);
+
+      try {
+        const overviewResponse = await landingApi.getOverview();
+        const walletResponse = isLoggedIn ? await landingApi.getWallet() : null;
+
+        if (!active) return;
+        setOverview(overviewResponse.data);
+        setWallet(walletResponse?.data || null);
+        setApiError("");
+      } catch (error) {
+        if (!active) return;
+        setApiError(error.message);
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    loadLandingData(true);
+    const pollId = setInterval(() => loadLandingData(false), 30000);
+
+    return () => {
+      active = false;
+      clearInterval(pollId);
+    };
+  }, [isLoggedIn]);
+
+  useEffect(() => {
     const id = setInterval(
-      () => setTickerIndex((i) => (i + 1) % TICKER.length),
+      () => setTickerIndex((i) => (i + 1) % tickerMessages.length),
       3200
     );
     return () => clearInterval(id);
-  }, []);
+  }, [tickerMessages.length]);
 
   const handleTiltMove = (e) => {
     const rect = cardRef.current.getBoundingClientRect();
@@ -262,6 +281,17 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
       </header>
       {menuOpen && <div className="cb-mobile-scrim" onClick={closeMenu} aria-hidden="true" />}
 
+      {(loading || apiError) && (
+        <div
+          className={`cb-data-status${apiError ? " cb-data-status--error" : ""}`}
+          role="status"
+        >
+          {apiError
+            ? "Live data is temporarily unavailable. Please try again shortly."
+            : "Loading live CleanBee data…"}
+        </div>
+      )}
+
       {/* Hero */}
       <section className="cb-hero">
         <div className="cb-hero-blob b1" aria-hidden="true" />
@@ -305,16 +335,16 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
             </div>
             <div className="cb-hero-stats">
               <div>
-                <strong>12,400 kg</strong>
+                <strong>{loading ? "—" : `${numberFormat.format(overview.stats.waste_diverted_kg)} kg`}</strong>
                 <span>waste diverted</span>
               </div>
               <div>
-                <strong>3,200</strong>
+                <strong>{loading ? "—" : numberFormat.format(overview.stats.active_volunteers)}</strong>
                 <span>active volunteers</span>
               </div>
               <div>
-                <strong>18 min</strong>
-                <span>avg. pickup time</span>
+                <strong>{loading ? "—" : numberFormat.format(overview.stats.completed_pickups)}</strong>
+                <span>completed pickups</span>
               </div>
             </div>
           </div>
@@ -328,7 +358,7 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
                 </div>
                 <div className="cb-coin-face cb-coin-back">
                   <Icon name="coin" size={34} />
-                  <span>+40 pts</span>
+                  <span>Eco pts</span>
                 </div>
               </div>
               <span className="cb-coin-ring" />
@@ -345,7 +375,7 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
         <div className="cb-ticker">
           <span className="cb-ticker-dot" />
           <span key={tickerIndex} className="cb-ticker-text">
-            {TICKER[tickerIndex]}
+            {tickerMessages[tickerIndex % tickerMessages.length]}
           </span>
         </div>
       </section>
@@ -419,7 +449,7 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
           <h2>Small pickups add up fast.</h2>
         </div>
         <div className="cb-impact-grid">
-          {STATS.map((s) => (
+          {impactStats.map((s) => (
             <div className="cb-impact-cell" key={s.label}>
               <strong>{s.value}</strong>
               <span>{s.label}</span>
@@ -439,12 +469,17 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
               for perks, or let them stack up for something bigger.
             </p>
             <ul className="cb-rewards-list">
-              {REWARDS.map((r) => (
-                <li key={r.perk}>
-                  <span className="cb-rewards-points">{r.points} pts</span>
-                  <span>{r.perk}</span>
+              {overview.rewards.map((reward) => (
+                <li key={reward.id}>
+                  <span className="cb-rewards-points">
+                    {numberFormat.format(reward.points_required)} pts
+                  </span>
+                  <span>{reward.name}</span>
                 </li>
               ))}
+              {!loading && overview.rewards.length === 0 && (
+                <li className="cb-rewards-empty">No reward offers available right now.</li>
+              )}
             </ul>
           </div>
 
@@ -461,19 +496,45 @@ export default function LandingScreen({ hasRegistered, isLoggedIn, onLogout }) {
               <span>Eco wallet</span>
               <Icon name="coin" size={20} />
             </div>
-            <strong className="cb-reward-card-balance">1,840 pts</strong>
-            <div className="cb-reward-card-row">
-              <Icon name="check" size={16} />
-              <span>Pickup #4130 confirmed · +40 pts</span>
-            </div>
-            <div className="cb-reward-card-row">
-              <Icon name="check" size={16} />
-              <span>Pickup #4118 confirmed · +35 pts</span>
-            </div>
-            <div className="cb-reward-card-bar">
-              <div className="cb-reward-card-bar-fill" />
-            </div>
-            <span className="cb-reward-card-note">160 pts to your next perk</span>
+            {isLoggedIn ? (
+              <>
+                <strong className="cb-reward-card-balance">
+                  {loading || !wallet ? "—" : numberFormat.format(wallet.points)} pts
+                </strong>
+                {wallet?.recent_pickups?.map((pickup) => (
+                  <div className="cb-reward-card-row" key={pickup.id}>
+                    <Icon name="check" size={16} />
+                    <span>
+                      Pickup #{pickup.id} {formatStatus(pickup.status)}
+                      {pickup.earned_points ? ` · +${pickup.earned_points} pts` : ""}
+                    </span>
+                  </div>
+                ))}
+                {!loading && wallet?.recent_pickups?.length === 0 && (
+                  <div className="cb-reward-card-row">No pickup activity yet.</div>
+                )}
+                <div className="cb-reward-card-bar">
+                  <div
+                    className="cb-reward-card-bar-fill"
+                    style={{ width: `${walletProgress}%` }}
+                  />
+                </div>
+                <span className="cb-reward-card-note">
+                  {wallet?.next_reward
+                    ? `${numberFormat.format(wallet.points_to_next_reward)} pts to ${wallet.next_reward.name}`
+                    : wallet
+                      ? "All available reward targets reached"
+                      : "Loading wallet…"}
+                </span>
+              </>
+            ) : (
+              <div className="cb-wallet-login">
+                <p>Sign in to view your eco wallet and recent pickup rewards.</p>
+                <Link to="/login" className="cb-btn cb-btn-dark">
+                  Login to view wallet
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </section>

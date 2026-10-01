@@ -123,3 +123,9 @@ export const volunteerApi = {
       method: "POST",
     }),
 };
+
+export const landingApi = {
+  getOverview: () => request("/landing"),
+
+  getWallet: () => request("/landing/wallet"),
+};

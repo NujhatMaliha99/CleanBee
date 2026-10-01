@@ -100,10 +100,15 @@ class VolunteerTaskController extends Controller
             $this->ensureAssignedVolunteerOrAdmin($request, $task);
             $this->ensureStatus($task, 'in_progress');
 
+            $points = max(20, (int) round((float) $task->quantity * 5));
+
             $task->forceFill([
                 'status' => 'completed',
                 'completed_at' => now(),
+                'earned_points' => $points,
             ])->save();
+
+            $task->user()->increment('eco_points', $points);
 
             return $task->fresh();
         });
