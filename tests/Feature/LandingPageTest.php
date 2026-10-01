@@ -66,6 +66,8 @@ class LandingPageTest extends TestCase
             'password' => 'password123',
             'role' => $role,
             'eco_points' => $points,
+            'volunteer_enabled' => $role === 'volunteer',
+            'volunteer_availability' => $role === 'volunteer' ? 'available' : 'unavailable',
         ]);
     }
 

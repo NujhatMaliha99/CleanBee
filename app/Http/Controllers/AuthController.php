@@ -17,12 +17,16 @@ class AuthController extends Controller
     {
         $validated = $request->validated();
 
+        $role = $validated['role'] ?? 'user';
+
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name'  => $validated['last_name'] ?? null,
             'email'      => $validated['email'],
             'password'   => Hash::make($validated['password']),
-            'role'       => $validated['role'] ?? 'user',
+            'role'       => $role,
+            'volunteer_enabled' => $role === 'volunteer',
+            'volunteer_availability' => $role === 'volunteer' ? 'available' : 'unavailable',
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;

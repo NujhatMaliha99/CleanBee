@@ -124,6 +124,33 @@
   transition: all 0.15s ease;
 }
 
+.vol-availability-btn,
+.vol-disable-btn {
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.vol-availability-btn {
+  background: #e2f7ea;
+  color: #05472a;
+  border-color: #a7dfbc;
+}
+
+.vol-disable-btn {
+  background: #ffffff;
+  color: #64748b;
+}
+
+.vol-availability-btn:disabled,
+.vol-disable-btn:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .vol-logout-btn:hover {
   background: #fef2f2;
   color: #dc2626;
@@ -536,6 +563,15 @@
 
   .vol-logout-btn {
     padding: 8px 10px;
+  }
+
+  .vol-disable-btn {
+    display: none;
+  }
+
+  .vol-availability-btn {
+    padding: 8px;
+    font-size: 0.72rem;
   }
 
   .vol-hero {

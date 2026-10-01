@@ -102,6 +102,18 @@ export const areaReportApi = {
 };
 
 export const volunteerApi = {
+  updateMode: (enabled) =>
+    request("/volunteer/mode", {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    }),
+
+  updateAvailability: (availability) =>
+    request("/volunteer/availability", {
+      method: "PUT",
+      body: JSON.stringify({ availability }),
+    }),
+
   getAvailableTasks: () => request("/volunteer/tasks"),
 
   getMyTasks: () => request("/volunteer/my-tasks"),

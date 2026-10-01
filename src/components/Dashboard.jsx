@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
-import { authApi } from "../services/api";
+import { authApi, volunteerApi } from "../services/api";
 
 const BellIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="db-icon">
@@ -77,11 +77,12 @@ const PinIcon = () => (
   </svg>
 );
 
-export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
+export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteerEnabled }) {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileError, setProfileError] = useState("");
+  const [volunteerSwitching, setVolunteerSwitching] = useState(false);
 
   const [phone, setPhone] = useState(() => localStorage.getItem("phone") || "");
   const [address, setAddress] = useState(() => localStorage.getItem("address") || "");
@@ -268,6 +269,25 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
     setShowModal(null);
   };
 
+  const handleVolunteerSwitch = async () => {
+    if (volunteerEnabled || userRole === "admin") {
+      navigate("/volunteer/tasks");
+      return;
+    }
+
+    try {
+      setVolunteerSwitching(true);
+      const response = await volunteerApi.updateMode(true);
+      setUser(response.user);
+      onUserUpdated?.(response.user);
+      navigate("/volunteer/tasks");
+    } catch (error) {
+      setToast(error.message || "Could not enable volunteer mode.");
+    } finally {
+      setVolunteerSwitching(false);
+    }
+  };
+
   if (profileLoading) {
     return (
       <div className="db-container">
@@ -327,11 +347,17 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole }) {
 
           <button className="nav-btn active">Dashboard</button>
 
-          {["volunteer", "admin"].includes(userRole) && (
-            <button className="nav-btn" onClick={() => navigate("/volunteer/tasks")}>
-              Switch to Volunteer
-            </button>
-          )}
+          <button
+            className="nav-btn"
+            onClick={handleVolunteerSwitch}
+            disabled={volunteerSwitching}
+          >
+            {volunteerSwitching
+              ? "Enabling…"
+              : volunteerEnabled || userRole === "admin"
+                ? "Switch to Volunteer"
+                : "Enable Volunteer Mode"}
+          </button>
 
           <button
             className="nav-btn"

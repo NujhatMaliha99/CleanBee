@@ -7,6 +7,8 @@ import {
   getMyTasks,
   getTaskDetails,
   startTask,
+  updateVolunteerAvailability,
+  updateVolunteerMode,
 } from "../services/volunteerService";
 import VolunteerStats from "./VolunteerStats";
 import TaskFilters from "./TaskFilters";
@@ -21,7 +23,12 @@ const ArrowLeftIcon = () => (
   </svg>
 );
 
-export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
+export default function VolunteerDashboard({
+  isLoggedIn,
+  onLogout,
+  volunteerAvailability,
+  onUserUpdated,
+}) {
   const navigate = useNavigate();
 
   // Top tabs: 'available' | 'my-tasks'
@@ -48,6 +55,7 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
   const [confirmTask, setConfirmTask] = useState(null);
   const [confirmActionType, setConfirmActionType] = useState("claim"); // 'claim' | 'start' | 'complete'
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
+  const [updatingVolunteerState, setUpdatingVolunteerState] = useState(false);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -263,6 +271,34 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
     setSortBy("newest");
   };
 
+  const handleAvailabilityChange = async () => {
+    const nextAvailability = volunteerAvailability === "available" ? "unavailable" : "available";
+
+    try {
+      setUpdatingVolunteerState(true);
+      const user = await updateVolunteerAvailability(nextAvailability);
+      onUserUpdated?.(user);
+      showToast(`You are now ${nextAvailability}.`);
+    } catch (err) {
+      setError(err.message || "Could not update volunteer availability.");
+    } finally {
+      setUpdatingVolunteerState(false);
+    }
+  };
+
+  const handleDisableVolunteerMode = async () => {
+    try {
+      setUpdatingVolunteerState(true);
+      const user = await updateVolunteerMode(false);
+      onUserUpdated?.(user);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message || "Could not disable volunteer mode.");
+    } finally {
+      setUpdatingVolunteerState(false);
+    }
+  };
+
   return (
     <div className="volunteer-dashboard-page">
       {/* Toast Notification */}
@@ -299,6 +335,22 @@ export default function VolunteerDashboard({ isLoggedIn, onLogout }) {
                 <Link to="/pickup-requests" className="vol-header-link">
                   Pickup Requests
                 </Link>
+                <button
+                  type="button"
+                  className="vol-availability-btn"
+                  onClick={handleAvailabilityChange}
+                  disabled={updatingVolunteerState}
+                >
+                  {volunteerAvailability === "available" ? "Available" : "Unavailable"}
+                </button>
+                <button
+                  type="button"
+                  className="vol-disable-btn"
+                  onClick={handleDisableVolunteerMode}
+                  disabled={updatingVolunteerState}
+                >
+                  Disable volunteer mode
+                </button>
                 <button type="button" className="vol-logout-btn" onClick={onLogout}>
                   Logout
                 </button>
