@@ -32,6 +32,7 @@ class PickupRequest extends Model
             'assigned_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
+            'earned_points' => 'integer',
         ];
     }
 

@@ -80,9 +80,12 @@ class VolunteerTaskTest extends TestCase
         $this->actingAs($volunteer, 'sanctum')
             ->postJson("/api/volunteer/tasks/{$pickup->id}/complete")
             ->assertOk()
-            ->assertJsonPath('data.status', 'completed');
+            ->assertJsonPath('data.status', 'completed')
+            ->assertJsonPath('data.earned_points', 20);
 
         $this->assertNotNull($pickup->fresh()->completed_at);
+        $this->assertSame(20, $pickup->fresh()->earned_points);
+        $this->assertSame(20, $pickup->user->fresh()->eco_points);
     }
 
     public function test_volunteer_cannot_update_another_volunteers_task(): void
