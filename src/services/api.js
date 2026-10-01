@@ -89,6 +89,18 @@ export const pickupApi = {
     }),
 };
 
+export const areaReportApi = {
+  getAll: () => request("/area-reports"),
+
+  create: (details) =>
+    request("/area-reports", {
+      method: "POST",
+      body: details instanceof FormData ? details : JSON.stringify(details),
+    }),
+
+  getOne: (reportId) => request(`/area-reports/${reportId}`),
+};
+
 export const volunteerApi = {
   getAvailableTasks: () => request("/volunteer/tasks"),
 

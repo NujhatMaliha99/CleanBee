@@ -259,14 +259,16 @@ function App() {
         }
       />
 
-      {/* Area Reports — accessible to guests and logged-in users */}
       <Route
         path="/area-reports"
         element={
-          <AreaReports
-            isLoggedIn={isLoggedIn}
-            onLogout={handleLogout}
-          />
+          isLoggedIn && hasVerifiedAccess ? (
+            <AreaReports />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
