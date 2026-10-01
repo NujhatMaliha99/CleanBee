@@ -282,7 +282,6 @@ function App() {
         element={
           <PhotoVerification
             isLoggedIn={isLoggedIn}
-            onLogout={handleLogout}
           />
         }
       />
@@ -304,10 +303,7 @@ function App() {
       <Route
         path="/notifications"
         element={
-          <Notifications
-            isLoggedIn={isLoggedIn}
-            onLogout={handleLogout}
-          />
+          <Notifications />
         }
       />
 

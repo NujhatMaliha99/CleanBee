@@ -86,6 +86,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/reviews', [AdminReviewController::class, 'index']);
         Route::post('/admin/reviews/{type}/{id}/approve', [AdminReviewController::class, 'approve']);
         Route::post('/admin/reviews/{type}/{id}/reject', [AdminReviewController::class, 'reject']);
+        Route::patch('/pickup-photos/{photo}/approve', [PickupPhotoController::class, 'approve']);
+        Route::patch('/pickup-photos/{photo}/reject', [PickupPhotoController::class, 'reject']);
 
         Route::get('/admin/reports', function () {
             return response()->json([

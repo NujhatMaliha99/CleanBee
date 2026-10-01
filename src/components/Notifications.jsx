@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./Notifications.css";
 
 const INITIAL_NOTIFICATIONS = [
@@ -101,9 +101,7 @@ const ArrowLeftIcon = () => (
   </svg>
 );
 
-export default function Notifications({ isLoggedIn, onLogout }) {
-  const navigate = useNavigate();
-
+export default function Notifications() {
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [activeFilter, setActiveFilter] = useState("all");
 
