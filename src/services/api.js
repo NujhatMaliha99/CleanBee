@@ -36,6 +36,12 @@ export const authApi = {
       body: JSON.stringify(credentials),
     }),
 
+  adminLogin: (credentials) =>
+    request("/admin/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }),
+
   register: (details) =>
     request("/register", {
       method: "POST",
@@ -154,3 +160,31 @@ export const rewardApi = {
     headers: { "Idempotency-Key": idempotencyKey },
   }),
 };
+
+export const adminApi = {
+  getReviews: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/admin/reviews${query ? `?${query}` : ""}`);
+  },
+  approveReview: (type, id, body = {}) =>
+    request(`/admin/reviews/${type}/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  rejectReview: (type, id, reason) =>
+    request(`/admin/reviews/${type}/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+  approvePhoto: (photoId) =>
+    request(`/pickup-photos/${photoId}/approve`, {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    }),
+  rejectPhoto: (photoId, reason) =>
+    request(`/pickup-photos/${photoId}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    }),
+};
+
