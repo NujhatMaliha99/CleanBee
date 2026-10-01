@@ -80,6 +80,8 @@ class AuthController extends Controller
 
     public function resendVerification(Request $request): JsonResponse
     {
+        abort_unless(config('app.require_email_verification'), Response::HTTP_NOT_FOUND);
+
         if ($request->user()->hasVerifiedEmail()) {
             return response()->json([
                 'message' => 'Email is already verified',
