@@ -101,3 +101,54 @@
   color: #dc2626;
   border-color: #fecaca;
 }
+
+.task-filters-card {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.94);
+  border-radius: 17px;
+  padding: 15px;
+  box-shadow: 0 10px 26px rgba(18, 58, 38, 0.06);
+  backdrop-filter: blur(14px);
+}
+
+.filter-search-input,
+.filter-select {
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(31, 107, 69, 0.16);
+  color: #123a26;
+}
+
+.filter-search-input:focus,
+.filter-select:focus {
+  border-color: #6fcf97;
+  box-shadow: 0 0 0 3px rgba(111, 207, 151, 0.2);
+}
+
+.filter-select-group label {
+  color: #4c6b5b;
+}
+
+.filter-reset-btn {
+  min-height: 40px;
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(31, 107, 69, 0.15);
+  color: #4c6b5b;
+}
+
+@media (max-width: 760px) {
+  .filter-search-wrap,
+  .filter-select-group {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .filter-select-group {
+    justify-content: space-between;
+  }
+
+  .filter-select {
+    flex: 1;
+    max-width: 68%;
+  }
+}

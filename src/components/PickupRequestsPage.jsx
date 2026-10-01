@@ -25,6 +25,18 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
   const [pickupToCancel, setPickupToCancel] = useState(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
+  const pickupSummary = pickups.reduce(
+    (summary, pickup) => {
+      const status = (pickup.status || "pending").toLowerCase().replace(/[ -]/g, "_");
+      summary.total += 1;
+      if (status === "pending") summary.pending += 1;
+      if (status === "accepted" || status === "in_progress") summary.active += 1;
+      if (status === "completed") summary.completed += 1;
+      return summary;
+    },
+    { total: 0, pending: 0, active: 0, completed: 0 }
+  );
+
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(""), 4000);
@@ -154,6 +166,37 @@ export default function PickupRequestsPage({ isLoggedIn, onLogout, userRole }) {
 
       <main className="prp-main">
         <div className="prp-container">
+          <section className="prp-overview" aria-label="Pickup request overview">
+            <article className="prp-overview-card">
+              <span className="prp-overview-icon" aria-hidden="true">📦</span>
+              <div>
+                <strong>{pickupSummary.total}</strong>
+                <span>Total requests</span>
+              </div>
+            </article>
+            <article className="prp-overview-card prp-overview-card--honey">
+              <span className="prp-overview-icon" aria-hidden="true">⏳</span>
+              <div>
+                <strong>{pickupSummary.pending}</strong>
+                <span>Awaiting review</span>
+              </div>
+            </article>
+            <article className="prp-overview-card prp-overview-card--active">
+              <span className="prp-overview-icon" aria-hidden="true">🚚</span>
+              <div>
+                <strong>{pickupSummary.active}</strong>
+                <span>Active pickups</span>
+              </div>
+            </article>
+            <article className="prp-overview-card prp-overview-card--complete">
+              <span className="prp-overview-icon" aria-hidden="true">✓</span>
+              <div>
+                <strong>{pickupSummary.completed}</strong>
+                <span>Completed</span>
+              </div>
+            </article>
+          </section>
+
           <div className="prp-list-wrapper">
             <PickupRequestList
               pickups={pickups}

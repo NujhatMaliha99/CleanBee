@@ -123,3 +123,53 @@
   color: #ffffff;
   border-color: #dc2626;
 }
+
+.pickup-card {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(31, 107, 69, 0.12);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 7px 22px rgba(18, 58, 38, 0.06);
+}
+
+.pickup-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: linear-gradient(180deg, #6fcf97, #1f6b45);
+  opacity: 0.75;
+}
+
+.pickup-card--pending::before {
+  background: linear-gradient(180deg, #ffe08a, #ffc94a);
+}
+
+.pickup-card--cancelled::before {
+  background: #ef4444;
+}
+
+.pickup-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(18, 58, 38, 0.11);
+  border-color: rgba(111, 207, 151, 0.55);
+}
+
+.pickup-card__waste-type {
+  background: rgba(111, 207, 151, 0.16);
+  color: #1f6b45;
+  border-radius: 999px;
+  padding: 4px 9px;
+}
+
+.pickup-card__btn {
+  min-height: 38px;
+  border-radius: 10px;
+}
+
+.pickup-card__btn--details {
+  background: rgba(111, 207, 151, 0.14);
+  border-color: rgba(31, 107, 69, 0.16);
+  color: #123a26;
+}
