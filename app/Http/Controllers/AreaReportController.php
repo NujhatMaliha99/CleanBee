@@ -38,6 +38,7 @@ class AreaReportController extends Controller
 
         $data['user_id'] = $request->user()->id;
         $data['status'] = 'pending';
+        $data['admin_review_status'] = 'pending';
 
         $report = AreaReport::create($data);
 
@@ -121,6 +122,8 @@ class AreaReportController extends Controller
                 'message' => 'Only pending reports can be assigned.',
             ], 422);
         }
+
+        abort_unless($report->admin_review_status === 'approved', 422, 'This report must be approved by an administrator before assignment.');
 
         $data = $request->validate([
             'assigned_volunteer_id' => 'nullable|exists:users,id',

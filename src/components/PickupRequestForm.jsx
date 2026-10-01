@@ -150,7 +150,7 @@ export default function PickupRequestForm({ onSuccess, onCancel }) {
           <span className="alert-icon">✓</span>
           <div>
             <strong>Pickup scheduled successfully!</strong>
-            <p>Your request has been submitted and is pending volunteer assignment.</p>
+            <p>Your request has been submitted for administrator review.</p>
           </div>
         </div>
       )}

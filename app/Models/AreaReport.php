@@ -23,6 +23,7 @@ class AreaReport extends Model
         'status',
         'assigned_at',
         'resolved_at',
+        'admin_review_status',
     ];
 
     protected function casts(): array
