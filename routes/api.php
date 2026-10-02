@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/admin/login', [AuthController::class, 'login']);
+Route::post('/admin/login', [AuthController::class, 'adminLogin']);
 Route::get('/landing', [LandingController::class, 'index']);
 
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
@@ -88,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin
     Route::middleware(RoleMiddleware::class . ':admin')->group(function () {
 
+        Route::get('/admin/dashboard', [AdminReviewController::class, 'dashboard']);
         Route::get('/admin/reviews', [AdminReviewController::class, 'index']);
         Route::post('/admin/reviews/{type}/{id}/approve', [AdminReviewController::class, 'approve']);
         Route::post('/admin/reviews/{type}/{id}/reject', [AdminReviewController::class, 'reject']);

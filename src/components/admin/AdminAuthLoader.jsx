@@ -1,4 +1,3 @@
-import React from "react";
 import "./AdminLogin.css";
 
 export default function AdminAuthLoader({ message = "Authenticating administrator..." }) {

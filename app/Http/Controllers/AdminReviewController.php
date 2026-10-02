@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AreaReport;
 use App\Models\PickupPhoto;
 use App\Models\PickupRequest;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,117 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AdminReviewController extends Controller
 {
+    public function dashboard(): JsonResponse
+    {
+        $pickups = PickupRequest::query()
+            ->with('user:id,first_name,last_name,email')
+            ->latest()
+            ->limit(100)
+            ->get();
+
+        $photos = PickupPhoto::query()
+            ->with([
+                'pickupRequest:id,user_id,waste_type,pickup_address',
+                'uploader:id,first_name,last_name,email',
+            ])
+            ->latest()
+            ->limit(100)
+            ->get();
+
+        $claims = PickupRequest::query()
+            ->whereNotNull('assigned_volunteer_id')
+            ->with([
+                'user:id,first_name,last_name,email',
+                'assignedVolunteer:id,first_name,last_name,email,volunteer_availability',
+            ])
+            ->latest('assigned_at')
+            ->limit(100)
+            ->get();
+
+        $areaReports = AreaReport::query()
+            ->with('user:id,first_name,last_name,email')
+            ->latest()
+            ->limit(100)
+            ->get();
+
+        $users = User::query()
+            ->select([
+                'id',
+                'first_name',
+                'last_name',
+                'email',
+                'role',
+                'volunteer_enabled',
+                'volunteer_availability',
+                'created_at',
+            ])
+            ->latest()
+            ->limit(200)
+            ->get();
+
+        $history = collect()
+            ->concat($pickups->whereNotNull('admin_reviewed_at')->map(fn (PickupRequest $pickup) => [
+                'id' => "pickup-{$pickup->id}",
+                'request_type' => 'pickup',
+                'target_name' => trim(($pickup->user?->first_name ?? '') . ' ' . ($pickup->user?->last_name ?? '')) ?: "Pickup #{$pickup->id}",
+                'action' => $pickup->admin_review_status,
+                'reason' => $pickup->admin_rejection_reason,
+                'reviewed_at' => $pickup->admin_reviewed_at,
+            ]))
+            ->concat($photos->whereNotNull('verified_at')->map(fn (PickupPhoto $photo) => [
+                'id' => "photo-{$photo->id}",
+                'request_type' => 'photo',
+                'target_name' => trim(($photo->uploader?->first_name ?? '') . ' ' . ($photo->uploader?->last_name ?? '')) ?: "Photo #{$photo->id}",
+                'action' => $photo->status,
+                'reason' => $photo->rejection_reason,
+                'reviewed_at' => $photo->verified_at,
+            ]))
+            ->concat($claims->whereNotNull('claim_reviewed_at')->map(fn (PickupRequest $claim) => [
+                'id' => "claim-{$claim->id}",
+                'request_type' => 'volunteer',
+                'target_name' => trim(($claim->assignedVolunteer?->first_name ?? '') . ' ' . ($claim->assignedVolunteer?->last_name ?? '')) ?: "Claim #{$claim->id}",
+                'action' => $claim->claim_review_status,
+                'reason' => $claim->claim_rejection_reason,
+                'reviewed_at' => $claim->claim_reviewed_at,
+            ]))
+            ->concat($areaReports->whereNotNull('admin_reviewed_at')->map(fn (AreaReport $report) => [
+                'id' => "area-report-{$report->id}",
+                'request_type' => 'area report',
+                'target_name' => trim(($report->user?->first_name ?? '') . ' ' . ($report->user?->last_name ?? '')) ?: "Area report #{$report->id}",
+                'action' => $report->admin_review_status,
+                'reason' => $report->admin_rejection_reason,
+                'reviewed_at' => $report->admin_reviewed_at,
+            ]))
+            ->sortByDesc('reviewed_at')
+            ->values();
+
+        return response()->json([
+            'data' => [
+                'pickups' => $pickups,
+                'photos' => $photos,
+                'claims' => $claims,
+                'area_reports' => $areaReports,
+                'users' => $users,
+                'history' => $history,
+                'stats' => [
+                    'pending_pickups' => PickupRequest::where('admin_review_status', 'pending')->count(),
+                    'pending_photos' => PickupPhoto::where('status', 'pending')->count(),
+                    'pending_volunteers' => PickupRequest::whereNotNull('assigned_volunteer_id')->where('claim_review_status', 'pending')->count(),
+                    'pending_area_reports' => AreaReport::where('admin_review_status', 'pending')->count(),
+                    'approved_total' => PickupRequest::where('admin_review_status', 'approved')->count()
+                        + PickupPhoto::where('status', 'approved')->count()
+                        + PickupRequest::whereNotNull('claim_reviewed_at')->where('claim_review_status', 'approved')->count()
+                        + AreaReport::where('admin_review_status', 'approved')->count(),
+                    'rejected_total' => PickupRequest::where('admin_review_status', 'rejected')->count()
+                        + PickupPhoto::where('status', 'rejected')->count()
+                        + PickupRequest::whereNotNull('claim_reviewed_at')->where('claim_review_status', 'rejected')->count()
+                        + AreaReport::where('admin_review_status', 'rejected')->count(),
+                    'total_users' => User::count(),
+                ],
+            ],
+        ]);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $filters = $request->validate([
