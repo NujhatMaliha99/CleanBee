@@ -40,7 +40,7 @@ const EyeIcon = ({ open }) =>
     </svg>
   );
 
-export default function LoginScreen({ onLogin, onGuestLogin }) {
+export default function LoginScreen({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -59,10 +59,6 @@ export default function LoginScreen({ onLogin, onGuestLogin }) {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleGuestLogin = () => {
-    onGuestLogin ? onGuestLogin() : onLogin && onLogin({ guest: true });
   };
 
   return (
@@ -144,13 +140,9 @@ export default function LoginScreen({ onLogin, onGuestLogin }) {
           <span>or</span>
         </div>
 
-        <button
-          type="button"
-          className="cb-guest-btn"
-          onClick={handleGuestLogin}
-        >
-          Continue as Guest
-        </button>
+        <Link className="cb-secondary-btn" to="/admin/login">
+          Continue as Admin
+        </Link>
 
         <p className="cb-login-footer">
           Don&apos;t have an account? <Link to="/register">Sign up</Link>
