@@ -1,0 +1,94 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  DEPLOY_USER: s20230204063
+  DEPLOY_HOST: 187.52.122.100
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v4
+
+      - name: Use PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo_mysql
+          coverage: none
+
+      - name: Install PHP packages
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Run backend tests
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+          php artisan test
+          rm .env
+
+      - name: Prepare production PHP packages
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build the React app
+        run: |
+          npm ci
+          npm run build
+          test -f public/app/index.html
+
+      - name: Pack the release
+        run: |
+          tar \
+            --exclude='.git' \
+            --exclude='.env' \
+            --exclude='node_modules' \
+            --exclude='release.tar.gz' \
+            -czf release.tar.gz .
+          tar -tzf release.tar.gz > release-contents.txt
+          grep -Fx './vendor/autoload.php' release-contents.txt
+          grep -Fx './public/app/index.html' release-contents.txt
+          rm release-contents.txt
+
+      - name: Load the deploy key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/cleanbee_deploy
+          chmod 600 ~/.ssh/cleanbee_deploy
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Copy the release to the VPS
+        run: |
+          scp -i ~/.ssh/cleanbee_deploy release.tar.gz "$DEPLOY_USER@$DEPLOY_HOST:~/release.tar.gz"
+
+      - name: Activate the release
+        run: |
+          ssh -i ~/.ssh/cleanbee_deploy "$DEPLOY_USER@$DEPLOY_HOST" <<'REMOTE'
+          set -euo pipefail
+          mkdir -p ~/laravel
+          tar -xzf ~/release.tar.gz -C ~/laravel
+          cd ~/laravel
+          test -f .env
+          mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache
+          chmod -R u+rwX storage bootstrap/cache
+          php artisan optimize:clear
+          php artisan migrate --force
+          php artisan db:seed --class=AdminUserSeeder --force
+          php artisan storage:link --force
+          php artisan optimize
+          rm -f ~/release.tar.gz
+          REMOTE
