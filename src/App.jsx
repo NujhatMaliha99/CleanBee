@@ -32,7 +32,6 @@ function App() {
   const [volunteerAvailability, setVolunteerAvailability] = useState(
     () => localStorage.getItem("volunteerAvailability") || "unavailable"
   );
-  const [needsInitialLogin, setNeedsInitialLogin] = useState(() => !localStorage.getItem("authToken"));
   const [hasRegistered, setHasRegistered] = useState(
     () => localStorage.getItem("hasRegistered") === "true" || Boolean(localStorage.getItem("email"))
   );
@@ -52,7 +51,6 @@ function App() {
     setUserRole(user.role || "user");
     setVolunteerEnabled(Boolean(user.volunteer_enabled));
     setVolunteerAvailability(user.volunteer_availability || "unavailable");
-    setNeedsInitialLogin(false);
     setHasRegistered(true);
   }, []);
 
@@ -73,7 +71,6 @@ function App() {
         setUserRole("");
         setVolunteerEnabled(false);
         setVolunteerAvailability("unavailable");
-        setNeedsInitialLogin(true);
       });
   }, [saveSession]);
 
@@ -115,7 +112,6 @@ function App() {
       setUserRole("");
       setVolunteerEnabled(false);
       setVolunteerAvailability("unavailable");
-      setNeedsInitialLogin(true);
       throw new Error("Access denied. This account does not have administrator privileges.");
     }
 
@@ -148,7 +144,6 @@ function App() {
       setUserRole("");
       setVolunteerEnabled(false);
       setVolunteerAvailability("unavailable");
-      setNeedsInitialLogin(true);
     }
   };
 
@@ -160,12 +155,6 @@ function App() {
   };
 
   const hasVerifiedAccess = !EMAIL_VERIFICATION_REQUIRED || isEmailVerified;
-
-  const handleGuestLogin = () => {
-    // Guest mode — login ছাড়াই landing page-এ নিয়ে যাবে
-    setNeedsInitialLogin(false);
-    navigate("/", { replace: true });
-  };
 
   if (showSplash) {
     return (
@@ -214,10 +203,7 @@ function App() {
           isLoggedIn ? (
             <Navigate to={hasVerifiedAccess ? "/" : "/verify-email"} replace />
           ) : (
-            <LoginScreen
-              onLogin={handleLogin}
-              onGuestLogin={handleGuestLogin}
-            />
+            <LoginScreen onLogin={handleLogin} />
           )
         }
       />
@@ -266,7 +252,7 @@ function App() {
         element={
           isLoggedIn && !hasVerifiedAccess ? (
             <Navigate to="/verify-email" replace />
-          ) : !isLoggedIn && needsInitialLogin ? (
+          ) : !isLoggedIn ? (
             <Navigate to="/login" replace />
           ) : (
             <LandingScreen
@@ -339,13 +325,16 @@ function App() {
       {/* Backward Compatibility for /parent */}
       <Route path="/parent" element={<Navigate to="/" replace />} />
 
-      {/* Photo Verification — accessible to guests and logged-in users */}
       <Route
         path="/photo-verification"
         element={
-          <PhotoVerification
-            isLoggedIn={isLoggedIn}
-          />
+          isLoggedIn && hasVerifiedAccess ? (
+            <PhotoVerification isLoggedIn={isLoggedIn} />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
@@ -364,13 +353,15 @@ function App() {
 
       <Route
         path="/notifications"
-        element={isLoggedIn && hasVerifiedAccess ? (
-          <Notifications isLoggedIn={isLoggedIn} />
-        ) : isLoggedIn ? (
-          <Navigate to="/verify-email" replace />
-        ) : (
-          <Navigate to="/login" replace />
-        )}
+        element={
+          isLoggedIn && hasVerifiedAccess ? (
+            <Notifications isLoggedIn={isLoggedIn} />
+          ) : isLoggedIn ? (
+            <Navigate to="/verify-email" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
       />
 
       {/* Fallback Route - matched na hole landing-e pathabe */}
