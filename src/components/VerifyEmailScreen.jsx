@@ -56,7 +56,7 @@ export default function VerifyEmailScreen({ email, hasToken, onVerified, onLogou
         <button className="cb-submit" type="button" onClick={resend} disabled={isSending}>
           {isSending ? "Sending..." : "Resend verification email"}
         </button>
-        <button className="cb-guest-btn" type="button" onClick={onLogout}>Logout</button>
+        <button className="cb-secondary-btn" type="button" onClick={onLogout}>Logout</button>
       </div>
     </div>
   );
