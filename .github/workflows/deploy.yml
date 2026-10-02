@@ -55,12 +55,12 @@ jobs:
             --exclude='.git' \
             --exclude='.env' \
             --exclude='node_modules' \
-            --exclude='release.tar.gz' \
-            -czf release.tar.gz .
-          tar -tzf release.tar.gz > release-contents.txt
+            -czf "$RUNNER_TEMP/release.tar.gz" .
+          tar -tzf "$RUNNER_TEMP/release.tar.gz" > release-contents.txt
           grep -Fx './vendor/autoload.php' release-contents.txt
           grep -Fx './public/app/index.html' release-contents.txt
           rm release-contents.txt
+          mv "$RUNNER_TEMP/release.tar.gz" release.tar.gz
 
       - name: Load the deploy key
         env:
