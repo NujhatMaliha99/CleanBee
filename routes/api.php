@@ -12,12 +12,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RewardRedemptionController;
 use App\Http\Controllers\AdminReviewController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/admin/login', [AuthController::class, 'adminLogin']);
 Route::get('/landing', [LandingController::class, 'index']);
+Route::get('/health', HealthController::class);
 
 Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])
     ->middleware(['auth:sanctum', 'throttle:6,1'])
