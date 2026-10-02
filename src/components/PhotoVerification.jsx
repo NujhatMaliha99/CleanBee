@@ -192,9 +192,12 @@ export default function PhotoVerification({ isLoggedIn }) {
             </div>
 
             <div className="pv-success-actions">
-             <Link to="/" className="pv-btn pv-btn-primary">
-                Back to Home
-             </Link>
+              <Link to="/pickup-requests" className="pv-btn pv-btn-primary">
+                View My Pickups
+              </Link>
+              <Link to="/dashboard" className="pv-btn pv-btn-ghost">
+                Back to Dashboard
+              </Link>
               <button
                 type="button"
                 className="pv-btn pv-btn-ghost"
@@ -231,9 +234,12 @@ export default function PhotoVerification({ isLoggedIn }) {
           Clean<span className="pv-accent">Bee</span>
         </span>
         <div className="pv-topbar-right">
-          <Link to="/#features" className="pv-btn pv-btn-ghost pv-btn-sm">
-  <ArrowLeftIcon /> Back
-</Link>
+          <Link to="/dashboard" className="pv-btn pv-btn-ghost pv-btn-sm">
+            <ArrowLeftIcon /> Dashboard
+          </Link>
+          <Link to="/pickup-requests" className="pv-btn pv-btn-ghost pv-btn-sm">
+            My Pickups
+          </Link>
         </div>
       </header>
 

@@ -361,6 +361,13 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
 
           <button
             className="nav-btn"
+            onClick={() => document.getElementById("feature-navigation")?.scrollIntoView({ behavior: "smooth" })}
+          >
+            Features
+          </button>
+
+          <button
+            className="nav-btn"
             onClick={handleVolunteerSwitch}
             disabled={volunteerSwitching}
           >
@@ -403,6 +410,48 @@ export default function Dashboard({ onLogout, onUserUpdated, userRole, volunteer
           <p>
             Your contribution today helps build a cleaner, greener tomorrow.
           </p>
+        </section>
+
+        <section id="feature-navigation" className="db-card db-feature-navigation" aria-labelledby="feature-navigation-title">
+          <div className="db-feature-heading">
+            <div>
+              <h3 id="feature-navigation-title">Explore CleanBee Features</h3>
+              <p>Open any feature directly from your dashboard.</p>
+            </div>
+          </div>
+
+          <div className="db-feature-grid">
+            <button type="button" className="db-feature-link" onClick={() => navigate("/photo-verification")}>
+              <span className="db-feature-icon">📸</span>
+              <span><strong>Request a Pickup</strong><small>Submit waste details and a verification photo</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" className="db-feature-link" onClick={() => navigate("/pickup-requests")}>
+              <span className="db-feature-icon">🚛</span>
+              <span><strong>My Pickup Requests</strong><small>Track requests and photo verification status</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" className="db-feature-link" onClick={() => navigate("/area-reports")}>
+              <span className="db-feature-icon">📍</span>
+              <span><strong>Area Reports</strong><small>Report and track dirty areas near you</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" className="db-feature-link" onClick={handleVolunteerSwitch} disabled={volunteerSwitching}>
+              <span className="db-feature-icon">🙋</span>
+              <span><strong>Volunteer Tasks</strong><small>{volunteerEnabled || userRole === "admin" ? "Browse and manage available tasks" : "Enable volunteer mode and browse tasks"}</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" className="db-feature-link" onClick={() => navigate("/notifications")}>
+              <span className="db-feature-icon">🔔</span>
+              <span><strong>Notifications</strong><small>View pickup, volunteer and area updates</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button type="button" className="db-feature-link" onClick={() => navigate("/")}>
+              <span className="db-feature-icon">🏠</span>
+              <span><strong>Home</strong><small>Return to the CleanBee landing page</small></span>
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </section>
 
         <section className="db-stats">
