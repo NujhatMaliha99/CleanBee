@@ -34,6 +34,8 @@ class PickupRequest extends Model
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
             'earned_points' => 'integer',
+            'admin_reviewed_at' => 'datetime',
+            'claim_reviewed_at' => 'datetime',
         ];
     }
 

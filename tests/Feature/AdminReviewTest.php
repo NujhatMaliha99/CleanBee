@@ -40,6 +40,35 @@ class AdminReviewTest extends TestCase
             ->assertJsonMissingPath('data.photos');
     }
 
+    public function test_admin_dashboard_returns_database_records_and_summary(): void
+    {
+        $admin = $this->user('admin@example.com', 'admin');
+        $owner = $this->user();
+        $pickup = $this->pendingPickup($owner);
+        $report = AreaReport::create([
+            'user_id' => $owner->id,
+            'title' => 'Roadside waste',
+            'description' => 'Waste needs collection.',
+            'waste_type' => 'mixed',
+            'address' => 'Dhanmondi, Dhaka',
+            'latitude' => 23.7465,
+            'longitude' => 90.3760,
+            'status' => 'pending',
+            'admin_review_status' => 'pending',
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson('/api/admin/dashboard')
+            ->assertOk()
+            ->assertJsonPath('data.pickups.0.id', $pickup->id)
+            ->assertJsonPath('data.pickups.0.user.email', $owner->email)
+            ->assertJsonPath('data.stats.pending_pickups', 1)
+            ->assertJsonPath('data.area_reports.0.id', $report->id)
+            ->assertJsonPath('data.stats.pending_area_reports', 1)
+            ->assertJsonPath('data.stats.total_users', 2)
+            ->assertJsonFragment(['email' => $owner->email]);
+    }
+
     public function test_admin_can_approve_and_reject_pickups_with_a_saved_decision(): void
     {
         $admin = $this->user('admin@example.com', 'admin');

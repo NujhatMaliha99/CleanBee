@@ -151,6 +151,41 @@ class AuthTest extends TestCase
                  ->assertJson(['message' => 'Invalid email or password']);
     }
 
+    public function test_admin_can_login_through_admin_endpoint(): void
+    {
+        User::create([
+            'first_name' => 'CleanBee',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('admin-password'),
+            'role' => 'admin',
+        ]);
+
+        $this->postJson('/api/admin/login', [
+            'email' => 'ADMIN@EXAMPLE.COM',
+            'password' => 'admin-password',
+        ])->assertOk()
+            ->assertJsonPath('user.role', 'admin')
+            ->assertJsonStructure(['message', 'user', 'token']);
+    }
+
+    public function test_regular_user_cannot_receive_admin_token(): void
+    {
+        User::create([
+            'first_name' => 'Regular',
+            'email' => 'user@example.com',
+            'password' => Hash::make('password123'),
+            'role' => 'user',
+        ]);
+
+        $this->postJson('/api/admin/login', [
+            'email' => 'user@example.com',
+            'password' => 'password123',
+        ])->assertForbidden()
+            ->assertJson(['message' => 'This account does not have administrator privileges.']);
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
     public function test_protected_user_route_requires_authentication(): void
     {
         $response = $this->getJson('/api/user');

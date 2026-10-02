@@ -46,6 +46,10 @@ services:
       MAIL_FROM_ADDRESS: ${MAIL_FROM_ADDRESS:-hello@example.com}
       MAIL_FROM_NAME: ${MAIL_FROM_NAME:-CleanBee}
       REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-false}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_FIRST_NAME: ${ADMIN_FIRST_NAME:-CleanBee}
+      ADMIN_LAST_NAME: ${ADMIN_LAST_NAME:-Admin}
     ports:
       - "8000:8000"
     restart: on-failure:5

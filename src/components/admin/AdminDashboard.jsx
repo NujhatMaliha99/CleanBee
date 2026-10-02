@@ -1,7 +1,12 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import { adminApi } from "../../services/api";
 import "./AdminDashboard.css";
+
+const fullName = (user) => {
+  const name = [user?.first_name, user?.last_name].filter(Boolean).join(" ");
+  return name || "Unknown user";
+};
 
 /* -------------------------------------------------------------------------- */
 /* 1. STATUS BADGE COMPONENT                                                  */
@@ -291,6 +296,12 @@ export function ApprovalDetailsDrawer({
               <button type="button" className="admin-btn admin-btn-success" onClick={() => handleAct(onApprove, false, "Volunteer approved.")}>✓ Approve</button>
             </>
           )}
+          {type === "area-report" && (
+            <>
+              <button type="button" className="admin-btn admin-btn-danger" onClick={() => handleAct(onReject, true, "Area report rejected.")}>✕ Reject</button>
+              <button type="button" className="admin-btn admin-btn-success" onClick={() => handleAct(onApprove, false, "Area report approved.")}>✓ Approve</button>
+            </>
+          )}
         </div>
       </aside>
 
@@ -309,7 +320,7 @@ export function ApprovalDetailsDrawer({
 /* -------------------------------------------------------------------------- */
 /* 5. HEADER COMPONENT                                                        */
 /* -------------------------------------------------------------------------- */
-export function AdminHeader({ adminName = "Admin", pendingCount = 0, onLogout, onToggleSidebar, isSidebarCollapsed }) {
+export function AdminHeader({ adminName = "Admin", pendingCount = 0, onLogout, onToggleSidebar }) {
   const [showNotif, setShowNotif] = useState(false);
 
   return (
@@ -361,6 +372,7 @@ export function AdminSidebar({ activeTab, onTabChange, isCollapsed, counts = {} 
     { id: "photo", label: "Photo Verification", countKey: "photoPending", icon: "📸" },
     { id: "pickup", label: "Pickup Requests", countKey: "pickupPending", icon: "🚛" },
     { id: "volunteer", label: "Volunteer Approvals", countKey: "volunteerPending", icon: "🙋" },
+    { id: "area-report", label: "Area Reports", countKey: "areaReportPending", icon: "📍" },
     { id: "users", label: "Users", icon: "👥" },
     { id: "history", label: "Approval History", icon: "📜" },
   ];
@@ -395,6 +407,7 @@ export function AdminOverview({ stats, recentRequests, onSelectItem, onNavigateT
     { title: "Pending Photos", value: stats.pendingPhotos, icon: "📸", cls: "card-amber", tab: "photo" },
     { title: "Pending Pickups", value: stats.pendingPickups, icon: "🚛", cls: "card-orange", tab: "pickup" },
     { title: "Pending Volunteers", value: stats.pendingVolunteers, icon: "🙋", cls: "card-purple", tab: "volunteer" },
+    { title: "Pending Area Reports", value: stats.pendingAreaReports, icon: "📍", cls: "card-amber", tab: "area-report" },
     { title: "Approved Total", value: stats.approvedTotal, icon: "✅", cls: "card-green", tab: "history" },
     { title: "Rejected Total", value: stats.rejectedTotal, icon: "❌", cls: "card-red", tab: "history" },
     { title: "Total Users", value: stats.totalUsers, icon: "👥", cls: "card-blue", tab: "users" },
@@ -485,7 +498,7 @@ export function PhotoVerificationPanel({ photos = [], onSelectItem, onApprove, o
   );
 }
 
-export function PickupApprovalPanel({ pickups = [], volunteers = [], onSelectItem, onApprove, onReject, onRequestCorrections, onAssignVolunteer }) {
+export function PickupApprovalPanel({ pickups = [], onSelectItem, onApprove, onReject }) {
   const [search, setSearch] = useState("");
   const filtered = pickups.filter((p) => !search || (p.requesterName || "").toLowerCase().includes(search.toLowerCase()) || (p.address || "").toLowerCase().includes(search.toLowerCase()));
 
@@ -529,8 +542,55 @@ export function PickupApprovalPanel({ pickups = [], volunteers = [], onSelectIte
   );
 }
 
+export function AreaReportApprovalPanel({ reports = [], onSelectItem, onApprove, onReject }) {
+  const [search, setSearch] = useState("");
+  const filtered = reports.filter((report) => {
+    const searchable = `${report.reporterName} ${report.address} ${report.wasteType}`.toLowerCase();
+    return !search || searchable.includes(search.toLowerCase());
+  });
+
+  return (
+    <div className="admin-panel-container">
+      <div className="panel-header">
+        <h2 className="panel-title">Area Report Approvals</h2>
+        <span className="panel-count-badge">{filtered.length} Reports</span>
+      </div>
+      <ApprovalFilters searchTerm={search} onSearchChange={setSearch} statusFilter="all" onStatusChange={() => {}} onResetFilters={() => setSearch("")} />
+      <div className="admin-table-container">
+        <table className="admin-table">
+          <thead>
+            <tr><th>#ID</th><th>Reporter</th><th>Location</th><th>Waste Type</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {filtered.map((report) => (
+              <tr key={report.id} className="admin-table-row">
+                <td>#{report.id}</td>
+                <td>{report.reporterName}<br /><small style={{ color: "#666" }}>{report.userEmail}</small></td>
+                <td>📍 {report.address}</td>
+                <td>{report.wasteType}</td>
+                <td><StatusBadge status={report.status} /></td>
+                <td>
+                  <div className="action-buttons-group">
+                    <button type="button" className="admin-btn admin-btn-ghost btn-sm" onClick={() => onSelectItem(report, "area-report")}>Details</button>
+                    {report.status === "pending" && (
+                      <>
+                        <button type="button" className="admin-btn admin-btn-danger btn-xs" onClick={() => onReject(report)}>✕</button>
+                        <button type="button" className="admin-btn admin-btn-success btn-xs" onClick={() => onApprove(report)}>✓</button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export function VolunteerApprovalPanel({ applications = [], taskClaims = [], onSelectItem, onApprove, onReject }) {
-  const [subtab, setSubtab] = useState("apps");
+  const [subtab, setSubtab] = useState("claims");
   const dataset = subtab === "apps" ? applications : taskClaims;
 
   return (
@@ -587,9 +647,11 @@ export function AdminUsersPanel({ users = [], onUpdateUserStatus }) {
                 <td><span className="type-tag">{u.role?.toUpperCase() || "USER"}</span></td>
                 <td><StatusBadge status={u.status || "active"} /></td>
                 <td>
-                  <button type="button" className={`admin-btn ${u.status === "suspended" ? "admin-btn-success" : "admin-btn-danger"} btn-xs`} onClick={() => onUpdateUserStatus(u, u.status === "suspended" ? "active" : "suspended")}>
-                    {u.status === "suspended" ? "Reactivate" : "Suspend"}
-                  </button>
+                  {onUpdateUserStatus ? (
+                    <button type="button" className={`admin-btn ${u.status === "suspended" ? "admin-btn-success" : "admin-btn-danger"} btn-xs`} onClick={() => onUpdateUserStatus(u, u.status === "suspended" ? "active" : "suspended")}>
+                      {u.status === "suspended" ? "Reactivate" : "Suspend"}
+                    </button>
+                  ) : "—"}
                 </td>
               </tr>
             ))}
@@ -633,54 +695,150 @@ export function ApprovalHistory({ historyLogs = [] }) {
 export default function AdminDashboard({ isLoggedIn, userRole, onLogout }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  // Mock State Data
-  const [photos, setPhotos] = useState([
-    { id: 101, type: "photo", userName: "Rahim Uddin", area: "Banani", wasteType: "Plastic", status: "pending", photoUrl: "https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=400&q=80" },
-    { id: 102, type: "photo", userName: "Nusrat Jahan", area: "Dhanmondi", wasteType: "Organic", status: "pending", photoUrl: "https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=400&q=80" },
-  ]);
-  const [pickups, setPickups] = useState([
-    { id: 201, type: "pickup", requesterName: "Rahim Uddin", phone: "+880 1711-223344", address: "House 45, Road 11, Banani", area: "Banani", wasteType: "Plastic", quantity: "15 kg", status: "pending" },
-    { id: 202, type: "pickup", requesterName: "Nusrat Jahan", phone: "+880 1819-556677", address: "Road 27, Dhanmondi", area: "Dhanmondi", wasteType: "Organic", quantity: "8 kg", status: "pending" },
-  ]);
-  const [volApps, setVolApps] = useState([
-    { id: 301, type: "volunteer", volunteerName: "Kamal Hossain", area: "Uttara", availability: "Weekends", status: "approved" },
-    { id: 302, type: "volunteer", volunteerName: "Sadia Rahman", area: "Mirpur", availability: "Full-Time", status: "pending" },
-  ]);
+  const [photos, setPhotos] = useState([]);
+  const [pickups, setPickups] = useState([]);
+  const [volApps] = useState([]);
   const [volClaims, setVolClaims] = useState([]);
-  const [users, setUsers] = useState([
-    { id: 1, name: "Admin User", email: "admin@cleanbee.com", role: "admin", status: "active" },
-    { id: 2, name: "Rahim Uddin", email: "rahim@gmail.com", role: "user", status: "active" },
-  ]);
+  const [areaReports, setAreaReports] = useState([]);
+  const [users, setUsers] = useState([]);
   const [history, setHistory] = useState([]);
+  const [stats, setStats] = useState({
+    pendingPhotos: 0,
+    pendingPickups: 0,
+    pendingVolunteers: 0,
+    pendingAreaReports: 0,
+    approvedTotal: 0,
+    rejectedTotal: 0,
+    totalUsers: 0,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Drawer & Modal State
   const [selectedDrawerItem, setSelectedDrawerItem] = useState(null);
   const [drawerType, setDrawerType] = useState("photo");
   const [modalConfig, setModalConfig] = useState({ isOpen: false });
 
-  // Authorization Check
   const token = localStorage.getItem("authToken");
   const role = localStorage.getItem("userRole") || userRole;
-  if (!isLoggedIn && !token && role !== "admin") {
+
+  const loadDashboard = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+
+    try {
+      const response = await adminApi.getDashboard();
+      const data = response.data || {};
+
+      setPhotos((data.photos || []).map((photo) => ({
+        id: photo.id,
+        type: "photo",
+        reviewType: "photo",
+        userName: fullName(photo.uploader),
+        userEmail: photo.uploader?.email,
+        area: photo.pickup_request?.pickup_address || "Not provided",
+        wasteType: photo.pickup_request?.waste_type,
+        status: photo.status,
+        photoUrl: photo.image_url,
+      })));
+
+      setPickups((data.pickups || []).map((pickup) => ({
+        id: pickup.id,
+        type: "pickup",
+        reviewType: "pickup",
+        requesterName: fullName(pickup.user),
+        userEmail: pickup.user?.email,
+        phone: pickup.contact_phone,
+        address: pickup.pickup_address,
+        area: pickup.pickup_address,
+        wasteType: pickup.waste_type,
+        quantity: `${pickup.quantity} ${pickup.quantity_unit}`,
+        status: pickup.admin_review_status,
+      })));
+
+      setVolClaims((data.claims || []).map((claim) => ({
+        id: claim.id,
+        type: "volunteer",
+        reviewType: "claim",
+        volunteerName: fullName(claim.assigned_volunteer),
+        userEmail: claim.assigned_volunteer?.email,
+        area: claim.pickup_address,
+        availability: claim.assigned_volunteer?.volunteer_availability || "Not provided",
+        status: claim.claim_review_status,
+      })));
+
+      setAreaReports((data.area_reports || []).map((report) => ({
+        id: report.id,
+        type: "area-report",
+        reviewType: "area-report",
+        reporterName: fullName(report.user),
+        userName: fullName(report.user),
+        userEmail: report.user?.email,
+        address: report.address,
+        area: report.address,
+        wasteType: report.waste_type,
+        status: report.admin_review_status,
+        name: report.title,
+        description: report.description,
+      })));
+
+      setUsers((data.users || []).map((user) => ({
+        id: user.id,
+        name: fullName(user),
+        email: user.email,
+        role: user.role,
+        status: "active",
+      })));
+
+      const adminName = localStorage.getItem("firstName") || "Admin";
+      setHistory((data.history || []).map((entry) => ({
+        id: entry.id,
+        timestamp: entry.reviewed_at ? new Date(entry.reviewed_at).toLocaleString() : "",
+        requestType: entry.request_type,
+        targetName: entry.target_name,
+        action: entry.action ? entry.action.charAt(0).toUpperCase() + entry.action.slice(1) : "Reviewed",
+        adminName,
+        reason: entry.reason || "—",
+      })));
+
+      setStats({
+        pendingPhotos: data.stats?.pending_photos || 0,
+        pendingPickups: data.stats?.pending_pickups || 0,
+        pendingVolunteers: data.stats?.pending_volunteers || 0,
+        pendingAreaReports: data.stats?.pending_area_reports || 0,
+        approvedTotal: data.stats?.approved_total || 0,
+        rejectedTotal: data.stats?.rejected_total || 0,
+        totalUsers: data.stats?.total_users || 0,
+      });
+    } catch (error) {
+      setLoadError(error.message || "Unable to load admin dashboard data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if ((isLoggedIn || token) && role === "admin") {
+      const timeoutId = window.setTimeout(loadDashboard, 0);
+      return () => window.clearTimeout(timeoutId);
+    }
+    return undefined;
+  }, [isLoggedIn, token, role, loadDashboard]);
+
+  if ((!isLoggedIn && !token) || role !== "admin") {
     return <Navigate to="/admin/login" replace />;
   }
 
-  const pendingPhotos = photos.filter((p) => p.status === "pending").length;
-  const pendingPickups = pickups.filter((p) => p.status === "pending").length;
-  const pendingVols = volApps.filter((v) => v.status === "pending").length;
-  const totalPending = pendingPhotos + pendingPickups + pendingVols;
+  const pendingPhotos = stats.pendingPhotos;
+  const pendingPickups = stats.pendingPickups;
+  const pendingVols = stats.pendingVolunteers;
+  const pendingAreaReports = stats.pendingAreaReports;
+  const totalPending = pendingPhotos + pendingPickups + pendingVols + pendingAreaReports;
 
   const handleSelectItem = (item, type) => {
     setSelectedDrawerItem(item);
     setDrawerType(type);
-  };
-
-  const logAction = (item, type, action, reason) => {
-    setHistory((prev) => [
-      { id: Date.now(), requestId: item.id, requestType: type, targetName: item.userName || item.requesterName || item.volunteerName || item.name, action, adminName: "Super Admin", timestamp: new Date().toLocaleTimeString(), reason },
-      ...prev,
-    ]);
   };
 
   const handleApprove = (item) => {
@@ -689,13 +847,18 @@ export default function AdminDashboard({ isLoggedIn, userRole, onLogout }) {
       title: "Confirm Approval",
       message: `Approve request #${item.id}?`,
       actionType: "approve",
-      onConfirm: (reason) => {
-        if (drawerType === "photo") setPhotos((prev) => prev.map((p) => p.id === item.id ? { ...p, status: "approved" } : p));
-        if (drawerType === "pickup") setPickups((prev) => prev.map((p) => p.id === item.id ? { ...p, status: "approved" } : p));
-        if (drawerType === "volunteer") setVolApps((prev) => prev.map((v) => v.id === item.id ? { ...v, status: "approved" } : v));
-        logAction(item, drawerType, "Approved", reason || "Approved by admin.");
-        setModalConfig({ isOpen: false });
-        setSelectedDrawerItem(null);
+      onConfirm: async () => {
+        setIsProcessing(true);
+        try {
+          await adminApi.approveReview(item.reviewType || drawerType, item.id);
+          await loadDashboard();
+          setModalConfig({ isOpen: false });
+          setSelectedDrawerItem(null);
+        } catch (error) {
+          setLoadError(error.message || "Approval failed.");
+        } finally {
+          setIsProcessing(false);
+        }
       },
     });
   };
@@ -707,33 +870,41 @@ export default function AdminDashboard({ isLoggedIn, userRole, onLogout }) {
       message: `Reject request #${item.id}?`,
       actionType: "reject",
       requireReason: true,
-      onConfirm: (reason) => {
-        if (drawerType === "photo") setPhotos((prev) => prev.map((p) => p.id === item.id ? { ...p, status: "rejected" } : p));
-        if (drawerType === "pickup") setPickups((prev) => prev.map((p) => p.id === item.id ? { ...p, status: "rejected" } : p));
-        if (drawerType === "volunteer") setVolApps((prev) => prev.map((v) => v.id === item.id ? { ...v, status: "rejected" } : v));
-        logAction(item, drawerType, "Rejected", reason);
-        setModalConfig({ isOpen: false });
-        setSelectedDrawerItem(null);
+      onConfirm: async (reason) => {
+        setIsProcessing(true);
+        try {
+          await adminApi.rejectReview(item.reviewType || drawerType, item.id, reason);
+          await loadDashboard();
+          setModalConfig({ isOpen: false });
+          setSelectedDrawerItem(null);
+        } catch (error) {
+          setLoadError(error.message || "Rejection failed.");
+        } finally {
+          setIsProcessing(false);
+        }
       },
     });
   };
 
   return (
     <div className="admin-dashboard-layout">
-      <AdminHeader pendingCount={totalPending} onLogout={onLogout} onToggleSidebar={() => setIsCollapsed(!isCollapsed)} isSidebarCollapsed={isCollapsed} />
+      <AdminHeader adminName={localStorage.getItem("firstName") || "Admin"} pendingCount={totalPending} onLogout={onLogout} onToggleSidebar={() => setIsCollapsed(!isCollapsed)} isSidebarCollapsed={isCollapsed} />
       <div className="admin-body-wrap">
-        <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} isCollapsed={isCollapsed} counts={{ photoPending: pendingPhotos, pickupPending: pendingPickups, volunteerPending: pendingVols }} />
+        <AdminSidebar activeTab={activeTab} onTabChange={setActiveTab} isCollapsed={isCollapsed} counts={{ photoPending: pendingPhotos, pickupPending: pendingPickups, volunteerPending: pendingVols, areaReportPending: pendingAreaReports }} />
         <main className="admin-main-content">
-          {activeTab === "overview" && <AdminOverview stats={{ pendingPhotos, pendingPickups, pendingVolunteers: pendingVols, approvedTotal: photos.filter((p) => p.status === "approved").length, rejectedTotal: 0, totalUsers: users.length }} recentRequests={[...photos, ...pickups]} onSelectItem={handleSelectItem} onNavigateTab={setActiveTab} />}
-          {activeTab === "photo" && <PhotoVerificationPanel photos={photos} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} onRequestClearerPhoto={handleReject} />}
-          {activeTab === "pickup" && <PickupApprovalPanel pickups={pickups} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} />}
-          {activeTab === "volunteer" && <VolunteerApprovalPanel applications={volApps} taskClaims={volClaims} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} />}
-          {activeTab === "users" && <AdminUsersPanel users={users} onUpdateUserStatus={(u, s) => setUsers(users.map((x) => x.id === u.id ? { ...x, status: s } : x))} />}
-          {activeTab === "history" && <ApprovalHistory historyLogs={history} />}
+          {loadError && <div className="admin-alert-error" role="alert">{loadError} <button type="button" className="admin-btn admin-btn-ghost btn-sm" onClick={loadDashboard}>Retry</button></div>}
+          {isLoading && <div className="admin-panel-container"><p>Loading dashboard data...</p></div>}
+          {!isLoading && activeTab === "overview" && <AdminOverview stats={stats} recentRequests={[...photos, ...pickups, ...volClaims, ...areaReports]} onSelectItem={handleSelectItem} onNavigateTab={setActiveTab} />}
+          {!isLoading && activeTab === "photo" && <PhotoVerificationPanel photos={photos} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} onRequestClearerPhoto={handleReject} />}
+          {!isLoading && activeTab === "pickup" && <PickupApprovalPanel pickups={pickups} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} />}
+          {!isLoading && activeTab === "volunteer" && <VolunteerApprovalPanel applications={volApps} taskClaims={volClaims} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} />}
+          {!isLoading && activeTab === "area-report" && <AreaReportApprovalPanel reports={areaReports} onSelectItem={handleSelectItem} onApprove={handleApprove} onReject={handleReject} />}
+          {!isLoading && activeTab === "users" && <AdminUsersPanel users={users} />}
+          {!isLoading && activeTab === "history" && <ApprovalHistory historyLogs={history} />}
         </main>
       </div>
       <ApprovalDetailsDrawer isOpen={Boolean(selectedDrawerItem)} onClose={() => setSelectedDrawerItem(null)} item={selectedDrawerItem} type={drawerType} onApprove={handleApprove} onReject={handleReject} />
-      <ConfirmActionModal isOpen={modalConfig.isOpen} title={modalConfig.title} message={modalConfig.message} actionType={modalConfig.actionType} requireReason={modalConfig.requireReason} onConfirm={modalConfig.onConfirm} onCancel={() => setModalConfig({ isOpen: false })} />
+      <ConfirmActionModal isOpen={modalConfig.isOpen} title={modalConfig.title} message={modalConfig.message} actionType={modalConfig.actionType} requireReason={modalConfig.requireReason} onConfirm={modalConfig.onConfirm} onCancel={() => setModalConfig({ isOpen: false })} isProcessing={isProcessing} />
     </div>
   );
 }

@@ -149,6 +149,27 @@ export default function PickupDetailsModal({ pickup, isOpen, onClose, onCancelCl
                 </div>
               </div>
             )}
+
+            {pickup.photos?.length > 0 && (
+              <div className="pickup-info-box pickup-info-box--full">
+                <span className="pickup-info-label">Photo Verification</span>
+                {pickup.photos.map((photo) => (
+                  <div key={photo.id} className="address-contact-wrap" style={{ marginTop: "10px" }}>
+                    <div className="location-row">
+                      <span className="loc-text">
+                        {photo.photo_type?.replace(/_/g, " ")} photo: <strong>{photo.status?.replace(/_/g, " ")}</strong>
+                      </span>
+                    </div>
+                    {photo.rejection_reason && (
+                      <div className="contact-row">
+                        <span className="contact-icon">ℹ️</span>
+                        <span>{photo.rejection_reason}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

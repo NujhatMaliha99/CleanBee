@@ -33,6 +33,7 @@ class AreaReport extends Model
             'longitude' => 'decimal:7',
             'assigned_at' => 'datetime',
             'resolved_at' => 'datetime',
+            'admin_reviewed_at' => 'datetime',
         ];
     }
 

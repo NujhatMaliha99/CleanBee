@@ -16,7 +16,10 @@ class PickupRequestController extends Controller
     {
         $pickups = $request->user()
             ->pickupRequests()
-            ->with('assignedVolunteer:id,first_name,last_name,phone')
+            ->with([
+                'assignedVolunteer:id,first_name,last_name,phone',
+                'photos:id,pickup_request_id,photo_type,image_path,status,rejection_reason,verified_at',
+            ])
             ->latest()
             ->get();
 
@@ -46,7 +49,10 @@ class PickupRequestController extends Controller
         $this->ensureOwner($request, $pickup);
 
         return response()->json([
-            'data' => $pickup->load('assignedVolunteer:id,first_name,last_name,phone'),
+            'data' => $pickup->load([
+                'assignedVolunteer:id,first_name,last_name,phone',
+                'photos:id,pickup_request_id,photo_type,image_path,status,rejection_reason,verified_at',
+            ]),
         ]);
     }
 

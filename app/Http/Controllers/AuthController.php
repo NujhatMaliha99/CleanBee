@@ -62,6 +62,33 @@ class AuthController extends Controller
         ], Response::HTTP_OK);
     }
 
+    public function adminLogin(LoginRequest $request): JsonResponse
+    {
+        $validated = $request->validated();
+
+        $user = User::whereRaw('LOWER(email) = ?', [$validated['email']])->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
+            return response()->json([
+                'message' => 'Invalid email or password'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        if ($user->role !== 'admin') {
+            return response()->json([
+                'message' => 'This account does not have administrator privileges.'
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $token = $user->createToken('admin_auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Admin login successful',
+            'user' => $user,
+            'token' => $token,
+        ], Response::HTTP_OK);
+    }
+
     public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()?->delete();

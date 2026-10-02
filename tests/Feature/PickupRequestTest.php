@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\PickupRequest;
+use App\Models\PickupPhoto;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -47,6 +48,26 @@ class PickupRequestTest extends TestCase
             ->assertOk()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.user_id', $user->id);
+    }
+
+    public function test_user_can_see_photo_verification_status_with_pickup(): void
+    {
+        $user = $this->verifiedUser();
+        $pickup = PickupRequest::create(['user_id' => $user->id, ...$this->validPayload()]);
+        PickupPhoto::create([
+            'pickup_request_id' => $pickup->id,
+            'uploaded_by' => $user->id,
+            'photo_type' => 'before',
+            'image_path' => 'pickup-photos/test.jpg',
+            'status' => 'rejected',
+            'rejection_reason' => 'The image is too blurry.',
+        ]);
+
+        $this->actingAs($user, 'sanctum')
+            ->getJson("/api/pickups/{$pickup->id}")
+            ->assertOk()
+            ->assertJsonPath('data.photos.0.status', 'rejected')
+            ->assertJsonPath('data.photos.0.rejection_reason', 'The image is too blurry.');
     }
 
     public function test_user_cannot_view_another_users_pickup_request(): void

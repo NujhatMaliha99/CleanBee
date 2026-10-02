@@ -116,7 +116,7 @@ export default function PhotoVerification({ isLoggedIn }) {
         contact_phone: contactPhone.trim(),
       });
 
-      await pickupApi.uploadPhoto(pickupResponse.data.id, photo.file, "before");
+      const photoResponse = await pickupApi.uploadPhoto(pickupResponse.data.id, photo.file, "before");
 
       setSummary({
         pickupId: pickupResponse.data.id,
@@ -126,6 +126,7 @@ export default function PhotoVerification({ isLoggedIn }) {
         address: address.trim(),
         date: formatDate(date),
         time: formatTime(time),
+        verificationStatus: photoResponse.data?.status || "pending",
       });
       setSubmitted(true);
     } catch (requestError) {
@@ -163,6 +164,10 @@ export default function PhotoVerification({ isLoggedIn }) {
               <div className="pv-summary-row">
                 <span className="pv-summary-label">Photo</span>
                 <span className="pv-summary-value">{summary.photoName}</span>
+              </div>
+              <div className="pv-summary-row">
+                <span className="pv-summary-label">Photo Verification</span>
+                <span className="pv-summary-value">{summary.verificationStatus.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase())}</span>
               </div>
               <div className="pv-summary-row">
                 <span className="pv-summary-label">Quantity</span>

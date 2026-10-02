@@ -169,6 +169,7 @@ export const rewardApi = {
 };
 
 export const adminApi = {
+  getDashboard: () => request("/admin/dashboard"),
   getReviews: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     return request(`/admin/reviews${query ? `?${query}` : ""}`);
