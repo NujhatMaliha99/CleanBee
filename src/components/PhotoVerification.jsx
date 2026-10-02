@@ -41,7 +41,7 @@ function formatTime(t) {
 }
 
 /* ── Component ── */
-export default function PhotoVerification({ isLoggedIn, onLogout }) {
+export default function PhotoVerification({ isLoggedIn }) {
   const fileInputRef = useRef(null);
 
   /* Form state */

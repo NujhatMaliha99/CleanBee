@@ -32,6 +32,7 @@ class PickupRequestController extends Controller
         }
 
         unset($data['image']);
+        $data['admin_review_status'] = 'pending';
         $pickup = $request->user()->pickupRequests()->create($data)->refresh();
 
         return response()->json([

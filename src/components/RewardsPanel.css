@@ -1,0 +1,10 @@
+.rewards-panel h4 { margin: 1rem 0 0.5rem; }
+.rewards-list { display: grid; gap: 0.65rem; }
+.reward-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.7rem 0; border-bottom: 1px solid #e8eee7; }
+.reward-row > div { display: grid; gap: 0.2rem; }
+.reward-row span, .redemption-history { color: #65716a; font-size: 0.9rem; }
+.reward-row button { border: 0; border-radius: 0.5rem; padding: 0.55rem 0.8rem; background: #198754; color: white; cursor: pointer; }
+.reward-row button:disabled { opacity: 0.6; cursor: wait; }
+.rewards-error { color: #b42318; }
+.rewards-success { color: #167344; }
+.redemption-history { padding-left: 1.2rem; }

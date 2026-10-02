@@ -107,7 +107,11 @@ export default function VolunteerTaskCard({
           </button>
         )}
 
-        {status === "accepted" && onStart && (
+        {status === "accepted" && task.claim_review_status === "pending" && (
+          <span className="vol-completed-tag">Awaiting admin approval</span>
+        )}
+
+        {status === "accepted" && task.claim_review_status !== "pending" && onStart && (
           <button
             type="button"
             className="vol-btn vol-btn--start"

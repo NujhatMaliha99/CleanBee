@@ -36,6 +36,12 @@ export const authApi = {
       body: JSON.stringify(credentials),
     }),
 
+  adminLogin: (credentials) =>
+    request("/admin/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }),
+
   register: (details) =>
     request("/register", {
       method: "POST",
@@ -141,8 +147,50 @@ export const landingApi = {
 
   getWallet: () => request("/landing/wallet"),
 };
+
 export const notificationsApi = {
   getAll: () => request("/notifications"),
-  markAsRead: (notificationId) => request(`/notifications/${notificationId}/read`, { method: "PATCH" }),
+  markAsRead: (notificationId) =>
+    request(`/notifications/${notificationId}/read`, { method: "PATCH" }),
   markAllAsRead: () => request("/notifications/read", { method: "PATCH" }),
+};
+
+export const dashboardApi = {
+  getSummary: () => request("/dashboard"),
+};
+
+export const rewardApi = {
+  getAll: () => request("/rewards"),
+  getHistory: () => request("/reward-redemptions"),
+  redeem: (rewardId, idempotencyKey) => request(`/rewards/${rewardId}/redeem`, {
+    method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+  }),
+};
+
+export const adminApi = {
+  getReviews: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/admin/reviews${query ? `?${query}` : ""}`);
+  },
+  approveReview: (type, id, body = {}) =>
+    request(`/admin/reviews/${type}/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  rejectReview: (type, id, reason) =>
+    request(`/admin/reviews/${type}/${id}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+  approvePhoto: (photoId) =>
+    request(`/pickup-photos/${photoId}/approve`, {
+      method: "PATCH",
+      body: JSON.stringify({}),
+    }),
+  rejectPhoto: (photoId, reason) =>
+    request(`/pickup-photos/${photoId}/reject`, {
+      method: "PATCH",
+      body: JSON.stringify({ reason }),
+    }),
 };

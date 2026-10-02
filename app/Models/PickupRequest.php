@@ -22,6 +22,7 @@ class PickupRequest extends Model
         'contact_phone',
         'instructions',
         'image_path',
+        'admin_review_status',
     ];
 
     protected function casts(): array

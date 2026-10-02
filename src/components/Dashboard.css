@@ -88,7 +88,7 @@
 .db-welcome p { margin: 0; color: var(--ink-soft); font-weight: 500; }
 
 /* Stats Cards Grid */
-.db-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
+.db-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 24px; }
 .stat-card {
   background: var(--glass); border: 1px solid var(--glass-border); border-radius: 16px;
   padding: 16px; display: flex; align-items: center; gap: 14px; transition: 0.3s;
@@ -117,6 +117,7 @@
 
 /* Grid Layout */
 .db-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+.dashboard-pickup-modal { width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: auto; border-radius: 16px; }
 .db-left, .db-right { display: flex; flex-direction: column; gap: 24px; }
 
 /* Dashboard Glass Cards */

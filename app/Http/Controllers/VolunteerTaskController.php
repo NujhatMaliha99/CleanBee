@@ -14,6 +14,7 @@ class VolunteerTaskController extends Controller
     {
         $tasks = PickupRequest::query()
             ->where('status', 'pending')
+            ->where('admin_review_status', 'approved')
             ->whereNull('assigned_volunteer_id')
             ->with('user:id,first_name,last_name,phone')
             ->orderBy('pickup_date')
@@ -58,7 +59,7 @@ class VolunteerTaskController extends Controller
             $task = PickupRequest::query()->lockForUpdate()->findOrFail($pickup->id);
 
             abort_if(
-                $task->status !== 'pending' || $task->assigned_volunteer_id !== null,
+                $task->status !== 'pending' || $task->assigned_volunteer_id !== null || $task->admin_review_status !== 'approved',
                 Response::HTTP_CONFLICT,
                 'This task is no longer available.'
             );
@@ -67,13 +68,17 @@ class VolunteerTaskController extends Controller
                 'assigned_volunteer_id' => $request->user()->id,
                 'status' => 'accepted',
                 'assigned_at' => now(),
+                'claim_review_status' => 'pending',
+                'claim_reviewed_by' => null,
+                'claim_reviewed_at' => null,
+                'claim_rejection_reason' => null,
             ])->save();
 
             return $task->fresh();
         });
 
         return response()->json([
-            'message' => 'Task claimed successfully',
+            'message' => 'Task claim submitted for administrator approval.',
             'data' => $task,
         ]);
     }
@@ -83,6 +88,7 @@ class VolunteerTaskController extends Controller
         $task = DB::transaction(function () use ($request, $pickup) {
             $task = PickupRequest::query()->lockForUpdate()->findOrFail($pickup->id);
             $this->ensureAssignedVolunteerOrAdmin($request, $task);
+            abort_unless($task->claim_review_status === 'approved' || $request->user()->role === 'admin', Response::HTTP_FORBIDDEN, 'This volunteer claim is awaiting admin approval.');
             $this->ensureStatus($task, 'accepted');
 
             $task->forceFill([
