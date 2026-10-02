@@ -16,7 +16,7 @@ import AdminLogin from "./components/admin/AdminLogin";
 import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 import { authApi } from "./services/api";
 
-const EMAIL_VERIFICATION_REQUIRED = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION === "true";
+const EMAIL_VERIFICATION_REQUIRED = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION !== "false";
 
 function App() {
 
