@@ -11,6 +11,7 @@ use App\Http\Controllers\VolunteerProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\RewardRedemptionController;
 use App\Http\Controllers\AdminReviewController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -37,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile', [AuthController::class, 'updateProfile']);
     Route::get('/landing/wallet', [LandingController::class, 'wallet']);
     Route::get('/dashboard', [DashboardController::class, 'show']);
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::patch('/notifications/read', [NotificationController::class, 'markAllAsRead']);
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead']);
     Route::get('/rewards', [RewardRedemptionController::class, 'index']);
     Route::get('/reward-redemptions', [RewardRedemptionController::class, 'history']);
     Route::post('/rewards/{reward}/redeem', [RewardRedemptionController::class, 'redeem']);

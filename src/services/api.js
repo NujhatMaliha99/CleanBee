@@ -148,6 +148,13 @@ export const landingApi = {
   getWallet: () => request("/landing/wallet"),
 };
 
+export const notificationsApi = {
+  getAll: () => request("/notifications"),
+  markAsRead: (notificationId) =>
+    request(`/notifications/${notificationId}/read`, { method: "PATCH" }),
+  markAllAsRead: () => request("/notifications/read", { method: "PATCH" }),
+};
+
 export const dashboardApi = {
   getSummary: () => request("/dashboard"),
 };
@@ -187,4 +194,3 @@ export const adminApi = {
       body: JSON.stringify({ reason }),
     }),
 };
-

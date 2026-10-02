@@ -355,7 +355,7 @@ function App() {
         path="/notifications"
         element={
           isLoggedIn && hasVerifiedAccess ? (
-            <Notifications />
+            <Notifications isLoggedIn={isLoggedIn} />
           ) : isLoggedIn ? (
             <Navigate to="/verify-email" replace />
           ) : (
