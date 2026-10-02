@@ -11,6 +11,9 @@ import AreaReports from "./components/AreaReports";
 import Notifications from "./components/Notifications";
 import PickupRequestsPage from "./components/PickupRequestsPage";
 import VolunteerDashboard from "./components/VolunteerDashboard";
+import AdminDashboard from "./components/admin/AdminDashboard";
+import AdminLogin from "./components/admin/AdminLogin";
+import AdminProtectedRoute from "./components/admin/AdminProtectedRoute";
 import { authApi } from "./services/api";
 
 const EMAIL_VERIFICATION_REQUIRED = import.meta.env.VITE_REQUIRE_EMAIL_VERIFICATION === "true";
@@ -91,6 +94,32 @@ function App() {
   const handleLogin = async ({ email, password }) => {
     const session = await authApi.login({ email: email.trim().toLowerCase(), password });
     saveSession(session);
+    return session;
+  };
+
+  const handleAdminLogin = async ({ email, password, remember }) => {
+    const session = await authApi.adminLogin({ email: email.trim().toLowerCase(), password, remember });
+    if (!session || !session.user) {
+      throw new Error("Invalid response from authentication server.");
+    }
+    saveSession(session);
+
+    if (session.user.role !== "admin") {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("emailVerified");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("volunteerEnabled");
+      localStorage.removeItem("volunteerAvailability");
+      setIsLoggedIn(false);
+      setIsEmailVerified(false);
+      setUserRole("");
+      setVolunteerEnabled(false);
+      setVolunteerAvailability("unavailable");
+      setNeedsInitialLogin(true);
+      throw new Error("Access denied. This account does not have administrator privileges.");
+    }
+
+    return session;
   };
 
   const handleRegister = async (data) => {
@@ -124,6 +153,12 @@ function App() {
   };
 
   const navigate = useNavigate();
+
+  const handleAdminLogout = async () => {
+    await handleLogout();
+    navigate("/admin/login", { replace: true });
+  };
+
   const hasVerifiedAccess = !EMAIL_VERIFICATION_REQUIRED || isEmailVerified;
 
   const handleGuestLogin = () => {
@@ -144,6 +179,34 @@ function App() {
 
   return (
     <Routes>
+      {/* Admin Dedicated Login & Protected Route */}
+      <Route
+        path="/admin/login"
+        element={
+          isLoggedIn ? (
+            userRole === "admin" ? (
+              <Navigate to="/admin" replace />
+            ) : (
+              <Navigate to="/dashboard" replace />
+            )
+          ) : (
+            <AdminLogin onLogin={handleAdminLogin} />
+          )
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <AdminProtectedRoute isLoggedIn={isLoggedIn} userRole={userRole}>
+            <AdminDashboard
+              isLoggedIn={isLoggedIn}
+              userRole={userRole}
+              onLogout={handleAdminLogout}
+            />
+          </AdminProtectedRoute>
+        }
+      />
+
       {/* Login Route */}
       <Route
         path="/login"
