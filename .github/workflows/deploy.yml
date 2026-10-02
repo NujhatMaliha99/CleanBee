@@ -44,6 +44,8 @@ jobs:
           cache: npm
 
       - name: Build the React app
+        env:
+          VITE_REQUIRE_EMAIL_VERIFICATION: 'true'
         run: |
           npm ci
           npm run build

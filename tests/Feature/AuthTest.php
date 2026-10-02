@@ -14,9 +14,10 @@ class AuthTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_registration_skips_verification_when_feature_is_paused(): void
+    public function test_registration_sends_verification_when_feature_is_enabled(): void
     {
         Notification::fake();
+        config(['app.require_email_verification' => true]);
 
         $response = $this->postJson('/api/register', [
             'first_name' => 'Nujhat',
@@ -32,7 +33,7 @@ class AuthTest extends TestCase
             'email' => 'nujhat@example.com',
         ]);
 
-        Notification::assertNotSentTo(User::where('email', 'nujhat@example.com')->first(), VerifyEmail::class);
+        Notification::assertSentTo(User::where('email', 'nujhat@example.com')->first(), VerifyEmail::class);
     }
 
     public function test_user_can_verify_email_from_signed_link(): void
@@ -55,9 +56,10 @@ class AuthTest extends TestCase
         $this->assertTrue($user->fresh()->hasVerifiedEmail());
     }
 
-    public function test_resend_endpoint_is_unavailable_when_feature_is_paused(): void
+    public function test_user_can_resend_verification_when_feature_is_enabled(): void
     {
         Notification::fake();
+        config(['app.require_email_verification' => true]);
 
         $user = User::create([
             'first_name' => 'Nujhat',
@@ -67,9 +69,10 @@ class AuthTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/email/verification-notification')
-            ->assertNotFound();
+            ->assertOk()
+            ->assertJson(['message' => 'Verification email sent']);
 
-        Notification::assertNotSentTo($user, VerifyEmail::class);
+        Notification::assertSentTo($user, VerifyEmail::class);
     }
 
     public function test_unverified_user_can_update_profile_when_feature_is_paused(): void
