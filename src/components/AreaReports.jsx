@@ -143,8 +143,8 @@ export default function AreaReports() {
       <header className="ar-topbar">
         <span className="ar-logo">Clean<span className="ar-accent">Bee</span></span>
         <div className="ar-topbar-right">
-          <Link to="/dashboard" className="ar-btn ar-btn-ghost ar-btn-sm">
-            <ArrowLeftIcon /> Back to Dashboard
+          <Link to="/" className="ar-btn ar-btn-ghost ar-btn-sm">
+            <ArrowLeftIcon /> Back
           </Link>
         </div>
       </header>
